@@ -30,21 +30,21 @@ async def create_example_video_async(user_id):
     font_ = TTFont(font_file)
     font_name = font_['name'].names[1].toUnicode()
     if outline:
-        outline_str = f',OutlineColour={outline_color},OutlineSize={outline_size}'
+        outline_str = f",OutlineColour={outline_color},OutlineSize={outline_size}"
     else:
-        outline_str = ''
+        outline_str = ""
 
     if shadow:
-        shadow_str = f',ShadowColour={shadow_color},ShadowXOffset={shadow_size},ShadowYOffset={shadow_size}'
+        shadow_str = f",ShadowColour={shadow_color},ShadowXOffset={shadow_size},ShadowYOffset={shadow_size}"
     else:
-        shadow_str = ''
+        shadow_str = ""
     command = [
-        'ffmpeg',
-        '-y',
-        '-i', example_image,
-        '-vf',
+        "ffmpeg",
+        "-y",
+        "-i", example_image,
+        "-vf",
         f"subtitles={subtitle_file}:force_style='FontName={font_name},FontSize={font_size},PrimaryColour={font_color}{shadow_str}{outline_str}'",
-        '-c:a', 'copy',
+        "-c:a", "copy",
         output_file
     ]
     print(command)

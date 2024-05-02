@@ -180,7 +180,15 @@ def combine_video_chunks(files, title):
             print('fileee', file.split('o/')[1])
             f.write('file {}\n'.format(file.split('o/')[1]))
 
-    subprocess.run(f'ffmpeg -f concat -i {tmp_video_path}/files.txt -c copy video/omni_{title}.mp4')
+    command = ["ffmpeg",
+               "-y",
+               "-f",
+               "concat -i",
+               f"{tmp_video_path}/files.txt",
+               "-c",
+               "copy",
+               f"video/omni_{title}.mp4"]
+    subprocess.run(command)
 
     return f'video/omni_{title}.mp4'
 
