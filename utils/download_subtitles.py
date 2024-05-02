@@ -7,7 +7,6 @@ from spawnbot import bot
 from aiogram.types.input_file import FSInputFile
 import concurrent.futures
 
-
 def all_files_in_one():
     folder_path = 'subtitles'
 
@@ -56,7 +55,14 @@ def extract_subtitles(name):
 
     return phrases
 
-def download_video_subtitles(url_video):
+def format_time(milliseconds: int) -> str:
+    seconds = milliseconds // 1000
+    minutes = seconds // 60
+    seconds %= 60
+    return f'{minutes:02d}:{seconds:02d}'
+
+
+def download_video_subtitles(url_video, _all_=False):
     yt = YouTube(url_video)
     title = None
     try:
@@ -70,12 +76,24 @@ def download_video_subtitles(url_video):
                 break
             selected_caption = caption
         title = re.sub(r'[^\w\sа-яёА-ЯЁ]', '', yt.title).replace(' ', '_')
-        if selected_caption:
-            with open(f'subtitles/{title}.xml', 'w', encoding='utf-8') as f:
-                f.write(selected_caption.xml_captions)
-            for i in (extract_subtitles(title)):
-                with open(f'subtitles/{title}.txt', 'a', encoding='utf-8') as f:
-                    f.write(i['text']+'\n')
+        if _all_:
+            if selected_caption:
+                with open(f'subtitles/{title}.xml', 'w', encoding='utf-8') as f:
+                    f.write(selected_caption.xml_captions)
+                for i in (extract_subtitles(title)):
+                    with open(f'subtitles/{title}.txt', 'a', encoding='utf-8') as f:
+                        f.write(str(format_time(i['start_time'])) + '->' + str(format_time(i['end_time'])) + '\n')
+                        f.write(i['text'] + '\n')
+
+
+        else:
+            if selected_caption:
+                with open(f'subtitles/{title}.xml', 'w', encoding='utf-8') as f:
+                    f.write(selected_caption.xml_captions)
+                for i in (extract_subtitles(title)):
+                    with open(f'subtitles/{title}.txt', 'a', encoding='utf-8') as f:
+                        f.write(i['text']+'\n')
+
     except Exception as e:
         print(e)
     return title

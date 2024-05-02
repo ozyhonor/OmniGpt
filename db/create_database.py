@@ -33,8 +33,17 @@ CREATE TABLE IF NOT EXISTS users (
     quality TEXT DEFAULT 'original',
     max_words INTEGER DEFAULT 1,
     smart_sub BOOLEAN DEFAULT 0,
-    resolution TEXT DEFAULT 'Original',
-    id_settings_panel INTEGER DEFAULT 0
+    id_settings_panel INTEGER DEFAULT 0,
+    id_gpt_panel INTEGER DEFAULT 0,
+    id_speech_panel INTEGER DEFAULT 0,
+    download_subtitles BOOLEAN DEFAULT 0,
+    download_video BOOLEAN DEFAULT 0,
+    download_audio BOOLEAN DEFAULT 0,
+    id_youtube_panel INTEGER DEFAULT 0,
+    music TEXT DEFAULT '0',
+    volume_music INT CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
+    interesting_moment BOOLEAN DEFAULT 0,
+    video_title TEXT DEFAULT ''
 )
 """)
 

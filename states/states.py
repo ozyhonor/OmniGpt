@@ -9,6 +9,8 @@ class WaitingPremium(StatesGroup):
 class WaitingYoutube(StatesGroup):
     video = State()
     playlist = State()
+    link = State()
+
 
 
 class WaitingStartSpeech(StatesGroup):
@@ -40,11 +42,13 @@ class WaitingStateVideoSettings(StatesGroup):
     outline_color = State()
     shadow = State()
     shadow_size = State()
+    music = State()
     shadow_color = State()
     font = State()
     quality = State()
     max_words = State()
-    id_settings_panel = State()
+    id_settings_panel = State(),
+    volume_music = State()
 
 
 class WaitingStateGpt(StatesGroup):
