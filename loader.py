@@ -15,7 +15,7 @@ from handlers.youtube_handlers.youtube_playlist import youtube_playlist_router
 from handlers.videoeditor_handlers.video_router import video_router
 from handlers.videoeditor_handlers.video_settings_router import video_settings_router
 from handlers.videoeditor_handlers.video_editor_router import video_editor_router
-
+from handlers.youtube_handlers.youtube_settings import youtube_settings_router
 import sys
 import logging
 import asyncio
@@ -53,7 +53,8 @@ async def main() -> None:
         youtube_playlist_router,
         video_router,
         video_settings_router,
-        video_editor_router
+        video_editor_router,
+        youtube_settings_router
     )
     await dp.start_polling(bot, on_startup=on_startup)
 

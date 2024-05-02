@@ -23,9 +23,9 @@ class CustomKeyboard:
     def create_inline_kb_default_settings():
 
         builder = InlineKeyboardBuilder()
-        builder.button(text=f"Оставить текущие настройки.", callback_data="leave_current_settings")
+        builder.button(text=f"Оставить текущие настройки.", callback_data="video_cancel")
 
-        return builder
+        return builder.as_markup()
 
     @staticmethod
     def create_queue_button():
@@ -57,8 +57,22 @@ class CustomKeyboard:
             keyboard=[
                 [
                     KeyboardButton(text='◀️ Назад'),
-                    KeyboardButton(text='🎞 Видео'),
-                    KeyboardButton(text='💽 Плейлист')
+                    KeyboardButton(text='📥 Скачать')
+                    #KeyboardButton(text='💽 Плейлист')
+                ]
+                ],  resize_keyboard=True)
+
+        return keyboard
+
+    @staticmethod
+    def create_format_buttons():
+
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [
+                    KeyboardButton(text='◀️ Назад'),
+                    KeyboardButton(text='📥 Скачать')
+                    #KeyboardButton(text='💽 Плейлист')
                 ]
                 ],  resize_keyboard=True)
 
@@ -157,6 +171,9 @@ class CustomKeyboard:
 
         builder.row(
             InlineKeyboardButton(text='➕ Добавить', callback_data='add_new_stamp')
+        )
+        builder.row(
+            InlineKeyboardButton(text='Интересные моменты', callback_data='interesting_moment')
         )
         builder.row(
             InlineKeyboardButton(text='❌ Очистить все', callback_data='clear_all_stamp')
@@ -300,6 +317,29 @@ class CustomKeyboard:
             InlineKeyboardButton(text='🔙 Назад', callback_data='back_color')
         )
         return builder.as_markup()
+
+    @staticmethod
+    def create_voice_menu():
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='alloy', callback_data='change_voice:alloy'),
+            InlineKeyboardButton(text='echo', callback_data='change_voice:echo'),
+            InlineKeyboardButton(text='fable', callback_data='change_voice:fable'),
+            InlineKeyboardButton(text='onyx', callback_data='change_voice:onyx'),
+            InlineKeyboardButton(text='nova', callback_data='change_voice:nova'),
+            InlineKeyboardButton(text='shimmer', callback_data='change_voice:shimmer'),
+        )
+        builder.row(InlineKeyboardButton(text='Отмена', callback_data='video_cancel'))
+        return builder.as_markup()
+
+    @staticmethod
+    def inline_youtube_settings():
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text='Субтитры', callback_data='download_from_yt:subtitles'),
+                    InlineKeyboardButton(text='Видео', callback_data='download_from_yt:video'),
+                    InlineKeyboardButton(text='Аудио', callback_data='download_from_yt:audio'))
+        return builder.as_markup()
+
 
     @staticmethod
     def inline_cancel():
@@ -557,6 +597,30 @@ class CustomKeyboard:
         return builder.as_markup()
 
     @staticmethod
+    def create_music_frame():
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='🔹Видео', callback_data='video_settings'),
+            InlineKeyboardButton(text='Субтитры', callback_data='subtitles'),
+            InlineKeyboardButton(text='Перевод', callback_data='translator'),
+            InlineKeyboardButton(text='Кроп', callback_data='timestamps')
+        )
+        music = os.listdir('music')
+        for x,music in enumerate(music):
+            builder.row(InlineKeyboardButton(text=f'{music}', callback_data=f'music:{music}'))
+
+        builder.row(
+            InlineKeyboardButton(text='▪️Загрузить музыку▪️', callback_data='upload_music')
+        )
+        builder.row(
+            InlineKeyboardButton(text='🔊 Громкость', callback_data='volume_music')
+        )
+        builder.row(
+            InlineKeyboardButton(text='🔙 Назад', callback_data='back_resolution')
+        )
+        return builder.as_markup()
+
+    @staticmethod
     def inline_outline_size():
         builder = InlineKeyboardBuilder()
         builder.row(
@@ -589,7 +653,7 @@ class CustomKeyboard:
         )
         builder.row(
             InlineKeyboardButton(text='Формат', callback_data='format'),
-            InlineKeyboardButton(text='Качество', callback_data='quality'),
+            InlineKeyboardButton(text='Музыка', callback_data='music'),
             InlineKeyboardButton(text='Разрешение', callback_data='resolution')
         )
         builder.adjust(4)

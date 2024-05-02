@@ -3,6 +3,7 @@ from aiogram.types import Message
 from db.database import db
 from aiogram.fsm.context import FSMContext
 from menu import keyboards, texts
+from spawnbot import bot
 
 gpt_router = Router()
 
@@ -19,7 +20,9 @@ async def create_gpt_request_for_request(message: Message):
 
     await message.answer(f'{texts.future_request_information}', reply_markup=markup_reply)
 
-    await message.answer(texts.settings_request.format(setting, degree), reply_markup=markup_inline)
+    id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree), reply_markup=markup_inline)
+    id_gpt_panel = id_gpt_panel.message_id
+    db.update_user_settings('id_gpt_panel', id_gpt_panel, user_id)
     db.disconnect()
 
 @gpt_router.message(F.text == '◀️ Назад')

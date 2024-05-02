@@ -1,14 +1,11 @@
-from googletrans import Translator
-import requests
-from config_reader import proxy_config
+from moviepy.editor import *
+from moviepy.video.tools.subtitles import SubtitlesClip
 
+generator = lambda txt: TextClip(txt, font='Arial', fontsize=24, color='white')
+subs = SubtitlesClip('subtitles.srt', generator)
+subtitles = SubtitlesClip(subs, generator)
 
-def create_translate_text(text, dest='ru'):
+video = VideoFileClip("input.mp4")
+result = CompositeVideoClip([video, subtitles.set_pos(('center','bottom'))])
 
-    proxy = proxy_config()
-    requests.Session().proxies.update(proxy)
-    translator = Translator()
-    result = translator.translate(f'{text}', dest=dest)
-    translated_text = result.text
-    return translated_text
-
+result.write_videofile("output.mp4")

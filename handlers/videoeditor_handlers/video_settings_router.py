@@ -1,6 +1,5 @@
 from spawnbot import bot
 from aiogram import Router
-
 from  db.database import db
 from aiogram.types import Message
 from states.states import WaitingStateVideoSettings
@@ -83,6 +82,71 @@ async def process_translated_language(callback_query: types.CallbackQuery):
     markup = CustomKeyboard.inline_translated_languages()
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=panel_id, reply_markup=markup)
     db.disconnect()
+
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data == 'music')
+async def process_music_frame(callback_query: types.CallbackQuery):
+    db.connect()
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    markup = CustomKeyboard.create_music_frame()
+    await bot.edit_message_reply_markup(chat_id=user_id, message_id=panel_id, reply_markup=markup)
+    db.disconnect()
+
+
+async def send_good_in_callback(callback_query: types.CallbackQuery):
+    await callback_query.answer('Вау')
+
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data == 'volume_music')
+async def process_volume_music_button(callback_query: types.CallbackQuery, state: FSMContext):
+    db.connect()
+    await state.set_state(WaitingStateVideoSettings.volume_music)
+    user_id = callback_query.from_user.id
+    await callback_query.answer('Введите значение от 1 до 100')
+    db.disconnect()
+
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data == 'interesting_moment')
+async def process_interesting_moment_button(callback_query: types.CallbackQuery, state: FSMContext):
+    db.connect()
+    dict_bool = {1 : '✅', 0 : '❌'}
+    await state.set_state(WaitingStateVideoSettings.volume_music)
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    interesting_moment_value = db.get_user_settings('interesting_moment', user_id)
+    db.update_user_settings('interesting_moment', not(interesting_moment_value), user_id)
+    await callback_query.answer(f'Интересные моменты AI {dict_bool[not(interesting_moment_value)]}')
+    db.disconnect()
+
+@video_settings_router.message(WaitingStateVideoSettings.volume_music)
+async def change_volume_music(message: Message, state: FSMContext):
+    db.connect()
+    user_id = message.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    markup = CustomKeyboard.inline_video_settings()
+    db.update_user_settings('volume_music', message.text, user_id)
+    new_text = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    await message.delete()
+    await state.clear()
+    db.disconnect()
+
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('music:'))
+async def process_music(callback_query: types.CallbackQuery):
+    db.connect()
+    music = callback_query.data.split(':')[1]
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    db.add_music(user_id=user_id, music=music)
+    markup = CustomKeyboard.create_music_frame()
+    new_text = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    db.disconnect()
+
 
 
 @video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('resolution:'))
@@ -279,6 +343,49 @@ async def font_settings(callback_query: types.CallbackQuery):
     markup = CustomKeyboard.inline_font()
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=panel_id, reply_markup=markup)
     db.disconnect()
+
+
+
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data == 'upload_music')
+async def music_add_button(callback_query: types.CallbackQuery, state: FSMContext):
+    db.connect()
+    await state.clear()
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    markup = CustomKeyboard.inline_cancel()
+    await bot.send_message(chat_id=user_id, text='Ожидается аудиофайл. mp3, wav, acc.', reply_markup=markup)
+    await state.set_state(WaitingStateVideoSettings.music)
+    db.disconnect()
+
+
+@video_settings_router.message(WaitingStateVideoSettings.music)
+async def upload_document_music(message: Message, state: FSMContext):
+    db.connect()
+    user_id = message.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    result: bool = await bot.send_chat_action(message.from_user.id, 'upload_audio')
+    file_id = message.audio.file_id
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    main_file_name = os.path.join('music', message.audio.file_name)
+    file_ext = os.path.splitext(main_file_name)[1]
+    db.disconnect()
+
+    if file_ext.lower() in ['.mp3', '.wav', '.acc']:
+        music = await bot.download_file(file_path, main_file_name)
+        print(message.text)
+        markup = CustomKeyboard.create_music_frame()
+        await bot.edit_message_reply_markup(chat_id=user_id, message_id=panel_id, reply_markup=markup)
+
+    await message.delete()
+    await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
+    await state.clear()
+
+
+
+
+
 
 
 @video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('font:'))
@@ -566,7 +673,7 @@ async def process_original_speed_button(callback_query: types.CallbackQuery):
 #CROOOOOOOP
 
 
-@video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('cancel_stamp;'))
+@video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('cancel_stamp:'))
 async def process_delite_one_crop_button(callback_query: types.CallbackQuery):
     db.connect()
     deliting = str(callback_query.data.split(';')[1])
@@ -688,28 +795,54 @@ async def reload_settings(user_id):
         'it': '🇮🇹',
         'ko': '🇰🇷'
     }
-    new_settings = f'{texts.video_settings_message.format(
-        db.get_format(user_id),
-        db.get_quality(user_id),
-        db.get_resolution(user_id),
-        dict_bool[db.get_subtitles(user_id)],
-        db.get_font(user_id),
-        db.get_size(user_id),
-        db.get_color(user_id),
-        db.get_position(user_id),
-        dict_bool[db.get_outline(user_id)],
-        db.get_outline_size(user_id),
-        db.get_outline_color(user_id),
-        dict_bool[db.get_shadow(user_id)],
-        db.get_shadow_size(user_id),
-        db.get_shadow_color(user_id),
-        dict_bool[db.get_translator(user_id)],
-        db.get_source_language(user_id),
-        db.get_translated_language(user_id) + languages[db.get_translated_language(user_id)],
-        db.get_original_speed(user_id),
-        db.get_translation_speed(user_id),
-        db.get_max_words(user_id),
-        dict_bool[db.get_smart_sub(user_id)],
-        db.get_timestamps(user_id)
-    )}'
+    music = db.get_music(user_id)
+    video_title = db.get_video_title(user_id)
+    resolution = db.get_resolution(user_id)
+    subtitles = dict_bool[db.get_subtitles(user_id)]
+    font = db.get_font(user_id)
+    size = db.get_size(user_id)
+    color = db.get_color(user_id)
+    position = db.get_position(user_id)
+    outline = dict_bool[db.get_outline(user_id)]
+    outline_size = db.get_outline_size(user_id)
+    outline_color = db.get_outline_color(user_id)
+    shadow = dict_bool[db.get_shadow(user_id)]
+    shadow_size = db.get_shadow_size(user_id)
+    shadow_color = db.get_shadow_color(user_id)
+    translator = dict_bool[db.get_translator(user_id)]
+    source_language = db.get_source_language(user_id)
+    translated_language = db.get_translated_language(user_id) + languages[db.get_translated_language(user_id)]
+    original_speed = db.get_original_speed(user_id)
+    translation_speed = db.get_translation_speed(user_id)
+    max_words = db.get_max_words(user_id)
+    smart_sub = dict_bool[db.get_smart_sub(user_id)]
+    timestamps = db.get_timestamps(user_id)
+    music_volume = db.get_user_settings('volume_music', user_id)
+
+    # Форматирование строки с настройками видео
+    new_settings = texts.video_settings_message.format(
+        music=music,
+        music_volume=music_volume,
+        video_title=video_title,
+        resolution=resolution,
+        subtitles=subtitles,
+        font=font,
+        size=size,
+        color=color,
+        position=position,
+        outline=outline,
+        outline_size=outline_size,
+        outline_color=outline_color,
+        shadow=shadow,
+        shadow_size=shadow_size,
+        shadow_color=shadow_color,
+        translator=translator,
+        source_language=source_language,
+        translated_language=translated_language,
+        original_speed=original_speed,
+        translation_speed=translation_speed,
+        max_words=max_words,
+        smart_sub=smart_sub,
+        timestamps=timestamps
+    )
     return new_settings

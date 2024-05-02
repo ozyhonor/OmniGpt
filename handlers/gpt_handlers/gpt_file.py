@@ -13,7 +13,9 @@ from utils.decode_any_format import detect_file_format
 from utils.gpt_requests import file_request
 from utils.split_text_for_gpt import split_text
 
+
 gpt_file = Router()
+
 
 
 @gpt_file.message(F.text == '🗂 Файл')
@@ -26,6 +28,9 @@ async def process_message_gpt_request(message: Message, state: FSMContext) -> No
 
 @gpt_file.message(WaitingStateGpt.file_gpt)
 async def process_file_gpt_request(message: Message, state: FSMContext, settings=None) -> None:
+    """
+
+    """
     states.states.stop_gpt = False
     markup = keyboards.CustomKeyboard.create_stop_button().as_markup()
     result: bool = await bot.send_chat_action(message.from_user.id, 'upload_document')
@@ -37,7 +42,6 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
-    print(len(text))
 
     chunks = split_text(text)
 
@@ -45,7 +49,6 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     answer = await file_request(chunks, message, settings)
 
-    print(answer)
     await message.answer(texts.water_mark_omnigpt.format(answer[0]))
 
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'

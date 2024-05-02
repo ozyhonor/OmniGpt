@@ -52,12 +52,23 @@ class DataBaseClass:
         self.cursor.execute('INSERT INTO users (id) VALUES (?)', (user_id,))
         self.connection.commit()
 
-    def get_user_settings(self, user_id):
+    def get_all_user_settings(self, user_id):
         self.cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
         user_settings = self.cursor.fetchone()
         if user_settings is None:
             return {}
         return dict(zip([column[0] for column in self.cursor.description], user_settings))
+    
+    def update_user_settings(self, key, value, user_id):
+        self.cursor.execute(f'UPDATE users SET {key} = ? WHERE id = ?', (value, user_id))
+        self.connection.commit()
+        
+    def get_user_settings(self, key, user_id):
+        self.cursor.execute(f'SELECT {key} FROM users WHERE id=?', (user_id,))
+        return self.cursor.fetchone()[0]
+
+
+
 
     def add_settings(self, user_id, settings):
         self.cursor.execute('UPDATE users SET gpt = ? WHERE id = ?', (settings, user_id))
@@ -270,6 +281,23 @@ class DataBaseClass:
     def add_smart_sub(self, user_id, smart_sub):
         self.cursor.execute('UPDATE users SET smart_sub = ? WHERE id = ?', (smart_sub, user_id))
         self.connection.commit()
+
+    def get_music(self, user_id):
+        self.cursor.execute('SELECT music FROM users WHERE id = ?', (user_id,))
+        return self.cursor.fetchone()[0]
+
+    def add_music(self, user_id, music):
+        self.cursor.execute('UPDATE users SET music = ? WHERE id = ?', (music, user_id))
+        self.connection.commit()
+
+    def get_video_title(self, user_id):
+        self.cursor.execute('SELECT video_title FROM users WHERE id = ?', (user_id,))
+        return self.cursor.fetchone()[0]
+
+    def add_video_title(self, user_id, video_title):
+        self.cursor.execute('UPDATE users SET video_title = ? WHERE id = ?', (video_title, user_id))
+        self.connection.commit()
+
 
 
     def close(self):

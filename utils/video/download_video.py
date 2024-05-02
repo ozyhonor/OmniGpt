@@ -16,8 +16,8 @@ def download_video(url: str, lang='ru') -> str:
     command = (f'yt-dlp '
                f'--username "robertswst45ur@gmail.com" '
                f'--password "dNn4zIDP9p" '
-               f'-o "video/{title}.%(ext)s" '
-               f'-f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" "{url}"')
+               f'-o "video/{title}.mp4" '
+               f'-f "bestvideo[ext=mp4]+bestaudio[ext=mp3]/best[ext=mp4]" "{url}"')
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     out, err = process.communicate()
