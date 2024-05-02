@@ -153,7 +153,9 @@ class VideoEditor:
                 # Проходим по всем файлам и добавляем их пути в файл
                 for file in final_fragments:
                     f.write('file {}\n'.format(file.split('/')[2]))
-            subprocess.run(f'ffmpeg -f concat -i {self.folder_name}/files.txt -c copy {self.folder_name}/ready.mp4')
+
+            cmd = ["ffmpeg", "-y", "-f", "concat", "-i", f"{self.folder_name}/files.txt", "-c", "copy", f"{self.folder_name}/ready.mp4"]
+            subprocess.run(cmd)
             self.video.close()
         else:
             generator = lambda text: TextClip(text, fontsize=int(self.settings['size']),
@@ -183,7 +185,8 @@ def combine_video_chunks(files, title):
     command = ["ffmpeg",
                "-y",
                "-f",
-               "concat -i",
+               "concat",
+               "-i",
                f"{tmp_video_path}/files.txt",
                "-c",
                "copy",
