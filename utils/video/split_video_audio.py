@@ -13,7 +13,8 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
 
     video = VideoFileClip(video_path)
     audio_path = video_path.replace('mp4', 'mp3')
-    subprocess.run(f"ffmpeg -i {video_path} -vn -ab 192k -ac 2 {audio_path}", shell=True)
+    cmd1= ["ffmpeg", "-y", f"-i {video_path}", "-vn", f"-ab 192k", "-ac 2", f"{audio_path}"]
+    subprocess.run(cmd1, shell=True)
 
     duration = video.duration
     max_duration_seconds = max_duration_minutes * 60
@@ -33,7 +34,6 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
         num_pieces = math.ceil(duration / max_duration_seconds)
 
         for i in range(num_pieces):
-            print('123')
             start_time = float(f"{i * max_duration_seconds:.2f}")
             end_time = float(f"{min((i + 1) * max_duration_seconds, duration):.2f}")
 
@@ -43,14 +43,14 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
             piece_path_mp3 = output_dir+ '/' + piece_mp3
 
             # Используем moviepy для разделения видео
-            cmd = f"ffmpeg -i {video_path} -ss {start_time} -to {end_time} -c copy {piece_path_mp4}"
-            subprocess.run(cmd, shell=True)
+            cmd2 = ["ffmpeg", "-y", "-i", f"{video_path}", f"-ss {start_time}", f"-to {end_time}", "-c", "copy", f"{piece_path_mp4}"]
+            subprocess.run(cmd2, shell=True)
 
             # Используем ffmpeg для разделения аудио
-            cmd = f"ffmpeg -i {audio_path} -ss {start_time} -to {end_time} -c:a libmp3lame -q:a 4 {piece_path_mp3}"
-            subprocess.run(cmd, shell=True)
+            cmd3 = ["ffmpeg", "-y", "-i", f"{audio_path}", f"-ss {start_time}", f"-to {end_time}", "-c:a", "libmp3lame", "-q:a 4" f"{piece_path_mp3}"]
+            subprocess.run(cmd3, shell=True)
 
-            send_recognize_request( output_dir + f'/piece_{i}.mp3', smart=smart)
+            send_recognize_request(output_dir + f'/piece_{i}.mp3', smart=smart)
             json_file = piece_path_mp3.replace(".mp3", ".json")
             srt_file = piece_path_mp3.replace(".mp3", ".srt")
             words_per_chunk = 6
