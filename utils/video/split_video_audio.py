@@ -13,7 +13,7 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
 
     video = VideoFileClip(video_path)
     audio_path = video_path.replace('mp4', 'mp3')
-    cmd1= ["ffmpeg", "-y", f"-i {video_path}", "-vn", f"-ab 192k", "-ac 2", f"{audio_path}"]
+    cmd1= ["ffmpeg", "-y", "-i", f"{video_path}", "-vn", "-ab", "192k", "-ac", "2", f"{audio_path}"]
     subprocess.run(cmd1, shell=True)
 
     duration = video.duration
@@ -42,12 +42,12 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
             piece_path_mp4 = output_dir+ '/' + piece_mp4 # TmpVideo/piece_0.mp4
             piece_path_mp3 = output_dir+ '/' + piece_mp3
 
-            # Используем moviepy для разделения видео
-            cmd2 = ["ffmpeg", "-y", "-i", f"{video_path}", f"-ss {start_time}", f"-to {end_time}", "-c", "copy", f"{piece_path_mp4}"]
+
+            cmd2 = ["ffmpeg", "-y", "-i", f"{video_path}", "-ss", f"{start_time}", "-to", f"{end_time}", "-c", "copy", f"{piece_path_mp4}"]
             subprocess.run(cmd2, shell=True)
 
-            # Используем ffmpeg для разделения аудио
-            cmd3 = ["ffmpeg", "-y", "-i", f"{audio_path}", f"-ss {start_time}", f"-to {end_time}", "-c:a", "libmp3lame", "-q:a 4" f"{piece_path_mp3}"]
+
+            cmd3 = ["ffmpeg", "-y", "-i", f"{audio_path}", "-ss", "{start_time}", "-to", f"{end_time}", "-c:a", "libmp3lame", "-q:a", "4", f"{piece_path_mp3}"]
             subprocess.run(cmd3, shell=True)
 
             send_recognize_request(output_dir + f'/piece_{i}.mp3', smart=smart)
