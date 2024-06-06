@@ -29,8 +29,8 @@ def proxy_config():
 
     return proxy_configuration
 
+yt_mail_for_downloading = config.get('youtube_support_account', 'mail')
+yt_pass_for_downloading = config.get('youtube_support_account', 'password')
 
 telegram_token = config.get('telegram', 'key')
 admin_id = config.get('telegram', 'admin_id')
-
-eden_token = config.get('eden', 'key')
