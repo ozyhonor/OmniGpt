@@ -27,10 +27,35 @@ class VideoEditor:
         self.video = VideoFileClip(self.video_title)
         self.final_fragments = []
 
+    def split_string(self, input_string, max_length=32):
+        parts = input_string.split('\n')
+        result = []
+
+        for part in parts:
+            words = part.split()
+            lines = []
+            current_line = ""
+
+            for word in words:
+                if len(current_line) + len(word) + 1 > max_length:
+                    lines.append(current_line)
+                    current_line = word
+                else:
+                    if current_line:
+                        current_line += " " + word
+                    else:
+                        current_line = word
+
+            if current_line:
+                lines.append(current_line)
+
+            result.append("\n".join(lines))
+
+        return "\n".join(result)
 
 
     def add_subtitles(self, video_fragment, text):
-        subtitle_clip = TextClip(text,  fontsize=int(self.settings['size']), stroke_color=self.settings['outline_color'], stroke_width=self.settings['outline_size'], color=self.settings['color'], font=f"fonts/{self.settings['font']}").set_position(('center', 'bottom')).set_duration(
+        subtitle_clip = TextClip(self.split_string(text), bg_color=self.settings['shadow_color'],  fontsize=int(self.settings['size']), stroke_color=self.settings['outline_color'], stroke_width=self.settings['outline_size'], color=self.settings['color'], font=f"fonts/{self.settings['font']}").set_position(('center', 'bottom')).set_duration(
             video_fragment.duration)
         video_with_subtitles = CompositeVideoClip([video_fragment, subtitle_clip])
         return video_with_subtitles
@@ -88,7 +113,7 @@ class VideoEditor:
         audio_path = f"{self.folder_name}/translated_part{number}.mp3"
 
         answer = openai_audio_request(model="tts-1", voice=self.settings['synthes_voice'], input_text=translated_text,
-                                      output_file=audio_path, speed=self.settings['synthes_speed'])
+                                      output_file=audio_path, speed=self.settings['translation_speed'])
 
         translated_speech = AudioFileClip(audio_path)
         duration_yandex_speech = str(float(translated_speech.duration)+0.3)
@@ -134,7 +159,7 @@ class VideoEditor:
                 text = n.text
                 if idx != len(self.subtitles) - 1 and start!=end:
                     if self.settings['translator']:
-                        translated_text = create_translate_text(text)
+                        translated_text = create_translate_text(text, self.settings['translated_language'])
                         output_file_translated = f"{self.folder_name}/translated_part{idx}.mp4"
                         self.create_translated_chunk(start, text, translated_text, idx, end, idx, output_file_translated)
                         final_fragments.append(output_file_translated)
@@ -160,6 +185,7 @@ class VideoEditor:
         else:
             generator = lambda text: TextClip(text, fontsize=int(self.settings['size']),
                                      stroke_color=self.settings['outline_color'],
+                                     bg_color=self.settings['shadow_color'],
                                      stroke_width=self.settings['outline_size'], color=self.settings['color'],
                                      font=f"fonts/{self.settings['font']}")
             subs = SubtitlesClip(self.subtitles_path, generator)
@@ -190,10 +216,10 @@ def combine_video_chunks(files, title):
                f"{tmp_video_path}/files.txt",
                "-c",
                "copy",
-               f"video/omni_{title}.mp4"]
+               f"video/omni_{title}"]
     subprocess.run(command)
 
-    return f'video/omni_{title}.mp4'
+    return f'video/omni_{title}'
 
 
 

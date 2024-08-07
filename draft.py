@@ -1,11 +1,12 @@
-from moviepy.editor import *
-from moviepy.video.tools.subtitles import SubtitlesClip
+import sqlite3
 
-generator = lambda txt: TextClip(txt, font='Arial', fontsize=24, color='white')
-subs = SubtitlesClip('subtitles.srt', generator)
-subtitles = SubtitlesClip(subs, generator)
+# Подключение к базе данных
+conn = sqlite3.connect('db/users_.db')
+cursor = conn.cursor()
 
-video = VideoFileClip("input.mp4")
-result = CompositeVideoClip([video, subtitles.set_pos(('center','bottom'))])
+# Добавление новых полей
+cursor.execute("ALTER TABLE users ADD COLUMN dest_lang TEXT DEFAULT 'en'")
+cursor.execute("ALTER TABLE users ADD COLUMN translator_id_panel INTEGER DEFAULT 0")
 
-result.write_videofile("output.mp4")
+# Сохранение изменений
+conn.commit()

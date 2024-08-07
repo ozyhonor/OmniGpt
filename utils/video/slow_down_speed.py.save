@@ -1,17 +1,15 @@
 import os
 import subprocess
 
+sadas
+def slow_down_speed(name, slow_down=0.6):
 
-def slow_down_speed(name, slow_down):
-
-    slow_setpts = {0.5: 2, 0.8: 1.25, 0.625: 1.6}[slow_down]
     ffmpeg_command = [
         "ffmpeg",
         "-y",
         "-i", name,
-        "-filter_complex", f"[0:v]setpts={slow_setpts}*PTS[v];[0:a]atempo={slow_down}[a]",
-        "-map", "[v]",
-        "-map", "[a]",
+        "-vf", f"setpts=PTS*1.25",
+        "-af", "atempo=0.8",
         name.replace('/', '/slowed_')
     ]
 

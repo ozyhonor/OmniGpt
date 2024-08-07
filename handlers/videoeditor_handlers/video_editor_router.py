@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from utils.video.download import download
 from utils.video.split_video_audio import split_video_and_get_subtitles
 from menu.keyboards import CustomKeyboard
+from utils.create_download_link import upload_to_fileio
 import os
 from utils.video.slow_down_speed import slow_down_speed
 from aiogram.types.input_file import FSInputFile
@@ -73,14 +74,15 @@ async def process_video_handler(message: Message, state: FSMContext):
         time_crop = db.get_timestamps(user_id)
     print(time_crop)
     smart = db.get_smart_sub(user_id)
-
+    if db.get_original_speed(user_id) != 1:
+        slow_down_speed('video/'+title, slow_down=db.get_original_speed(user_id))
 
     print(title)
     for i,timestamp in enumerate(time_crop.split(' ')):
         if time_crop != '0':
             splited_timestamps = split_timestamps(timestamp.split('-'), 'video/'+title)
         else:splited_timestamps = False
-        split_video_and_get_subtitles(smart, splited_timestamps or 'video/'+title, 'TmpVideo',15, settings['max_words'])
+        split_video_and_get_subtitles(smart, splited_timestamps or 'video/'+title, 'TmpVideo',16, settings['max_words'], overlap=settings['overlap'])
         files = ([i for i in os.listdir('TmpVideo') if i.endswith('.mp4') and '_' in i])
         files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
         ready_files = []
@@ -107,19 +109,19 @@ async def process_video_handler(message: Message, state: FSMContext):
         db.connect()
         if db.get_resolution(user_id) != 'original':
             change_resolution_video(title=f'video/omni_{title}')
-        if db.get_user_settings('original_speed', user_id) != 1:
-            slow_down_speed(name = f'video/omni_{title}')
         if db.get_user_settings('music', user_id) != 'None':
             music = db.get_user_settings('music', user_id)
+            music_volume = db.get_user_settings('volume_music', user_id)
             add_music(
                 f'omni_{title}',
                 'video',
                 f'music/{music}',
-                31
+                music_volume
             )
 
         if check_size(f'video/omni_{title}'):
-            link = create_and_upload_file(dir_path='video', name=f'omni_{title}')
+            link = upload_to_fileio(f'video/omni_{title}')
+            await bot.send_message(chat_id=user_id, text=f'Видео скачено!\n{link}')
         else:
             video = FSInputFile(f'video/omni_{title}')
             await bot.send_video(chat_id=user_id, video=video)
@@ -131,6 +133,5 @@ async def process_video_handler(message: Message, state: FSMContext):
     await state.clear()
     clear_directory('TmpVideo')
     clear_directory('video')
-    await message.answer(f'Видео скачено!\n{link}')
     db.disconnect()
 

@@ -1,7 +1,7 @@
 import json
 from typing import List, Dict
 
-def json_to_srt(smart, json_file: str, srt_file: str, words_per_chunk: int) -> None:
+def json_to_srt(smart, json_file: str, srt_file: str, words_per_chunk: int, overlap = 0) -> None:
     if smart:
         return
     with open(json_file, 'r', encoding='utf-8') as f:
@@ -11,7 +11,7 @@ def json_to_srt(smart, json_file: str, srt_file: str, words_per_chunk: int) -> N
     words = data['words']
 
     chunks = split_text_into_chunks(text, words, words_per_chunk)
-    srt_content = generate_srt_content(chunks, words)
+    srt_content = generate_srt_content(chunks, words, overlap=overlap)
 
     with open(srt_file, 'w', encoding='utf-8') as f:
         f.write(srt_content)
@@ -36,7 +36,7 @@ def split_text_into_chunks(text: str, words: List[Dict[str, float]], words_per_c
 
     return chunks
 
-def generate_srt_content(chunks: List[tuple[str, int, int]], words: List[Dict[str, float]]) -> str:
+def generate_srt_content(chunks: List[tuple[str, int, int]], words: List[Dict[str, float]], overlap:int) -> str:
     srt_content = ''
     index = 1
 
@@ -44,7 +44,7 @@ def generate_srt_content(chunks: List[tuple[str, int, int]], words: List[Dict[st
         if end_index < len(words) - 1:
             start_time, end_time = get_chunk_time(start_index, end_index, words)
             srt_content += f'{index}\n'
-            srt_content += f'{format_time(start_time)} --> {format_time(end_time)}\n'
+            srt_content += f'{format_time(start_time)} --> {format_time(end_time+overlap/1000)}\n'
             srt_content += f'{chunk}\n\n'
             index += 1
 
@@ -52,7 +52,7 @@ def generate_srt_content(chunks: List[tuple[str, int, int]], words: List[Dict[st
 def get_chunk_time(start_index: int, end_index: int, words: List[Dict[str, float]]) -> tuple[float, float]:
     start_time = words[start_index]['start']
     end_time = words[end_index]['end']
-
+    print(start_time, end_time)
     return start_time, end_time
 
 def format_time(time: float) -> str:

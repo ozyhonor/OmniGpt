@@ -1,0 +1,61 @@
+# Игнорировать все файлы в корневой директории, кроме указанных
+/*
+!spawnbot.py
+!requirements.txt
+!loader.py
+!config_reader.py
+!db/
+!fonts/
+!handlers/
+!menu/
+!music/
+!states/
+!txt files/
+!utils/
+!.gitignore
+
+# Игнорировать временные файлы и директории
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Игнорировать IDE и редакторы кода настройки
+/.vscode/
+.idea/
+*.sublime-workspace
+
+# Игнорировать файлы логов и баз данных
+*.log
+*.sql
+*.db
+
+# Игнорировать файлы OS
+.DS_Store
+Thumbs.db
+
+# Игнорировать файлы архивации
+*.tar.gz
+*.zip
+*.rar
+
+# Игнорировать другие несущественные файлы
+*.bak
+*.swp
+*.tmp

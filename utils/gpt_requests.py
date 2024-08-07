@@ -124,4 +124,5 @@ def solo_request(text, message, degree, settings, proxy):
         print(answer)
         return round(time() - start_time,2), answer
     else:
+        print(response.text)
         return solo_request(text, message, degree, settings, proxy_config())

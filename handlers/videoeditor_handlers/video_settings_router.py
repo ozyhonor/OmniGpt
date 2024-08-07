@@ -61,6 +61,28 @@ async def translator_settings(callback_query: types.CallbackQuery):
     db.disconnect()
 
 
+@video_settings_router.callback_query(lambda callback_query: callback_query.data=='overlap')
+async def process_overlap_button(callback_query: types.CallbackQuery):
+    db.connect()
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    markup = CustomKeyboard.inline_overlap_change()
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    db.disconnect()
+
+@video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('overlap:'))
+async def process_overlap_value_button(callback_query: types.CallbackQuery):
+    db.connect()
+    overlap = callback_query.data.split(':')[1]
+    user_id = callback_query.from_user.id
+    panel_id = db.get_id_panel(user_id)
+    db.update_user_settings(key='overlap', value=overlap, user_id=user_id)
+    new_text = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=CustomKeyboard.inline_overlap_change())
+    db.disconnect()
+
+
 @video_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('color:'))
 async def process_color_button(callback_query: types.CallbackQuery):
     db.connect()
@@ -479,6 +501,10 @@ async def shadow_settings(callback_query: types.CallbackQuery):
     panel_id = db.get_id_panel(user_id)
     markup = CustomKeyboard.inline_subtitles_settings()
     shadow = db.get_shadow(user_id)
+    if shadow:
+        db.add_shadow_color(user_id=user_id, shadow_color='transparent')
+    else:
+        db.add_shadow_color(user_id=user_id, shadow_color='black')
     db.add_shadow(user_id=user_id, shadow=not(shadow))
     new_text = await reload_settings(user_id)
     await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
@@ -817,6 +843,7 @@ async def reload_settings(user_id):
     max_words = db.get_max_words(user_id)
     smart_sub = dict_bool[db.get_smart_sub(user_id)]
     timestamps = db.get_timestamps(user_id)
+    overlap = db.get_user_settings('overlap', user_id)
     music_volume = db.get_user_settings('volume_music', user_id)
 
     # Форматирование строки с настройками видео
@@ -841,6 +868,7 @@ async def reload_settings(user_id):
         translated_language=translated_language,
         original_speed=original_speed,
         translation_speed=translation_speed,
+        overlap=overlap,
         max_words=max_words,
         smart_sub=smart_sub,
         timestamps=timestamps

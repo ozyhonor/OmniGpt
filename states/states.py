@@ -12,6 +12,10 @@ class WaitingYoutube(StatesGroup):
     link = State()
 
 
+class WaitingStateTranslator(StatesGroup):
+    text_translate = State()
+    file_translate = State()
+
 
 class WaitingStartSpeech(StatesGroup):
     rate = State()

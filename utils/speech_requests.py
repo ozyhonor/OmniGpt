@@ -39,7 +39,8 @@ def openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_conf
         response.raise_for_status()
         with open(output_file, 'wb') as file:
             file.write(response.content)
-    except:
+    except Exception as e:
+        print(e)
         return openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_config(), model='tts-1')
 
     return [output_file, round(time()-start_time,2)]

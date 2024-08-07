@@ -28,6 +28,32 @@ class CustomKeyboard:
         return builder.as_markup()
 
     @staticmethod
+    def inline_translated_languages_for_translator():
+        builder = InlineKeyboardBuilder()
+        languages = [
+            {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
+            {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
+            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+            {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
+            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+            {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
+            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+            {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+            {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+            {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
+        ]
+        for i in range(0, len(languages), 6):
+            row = languages[i:i + 6]
+            buttons_row = [
+                InlineKeyboardButton(text=language['flag'] + ' ' + language['name'],
+                                     callback_data=f'translator_dest_lang:{language["code"]}') for
+                language in row
+            ]
+            builder.row(*buttons_row)
+        return builder.as_markup()
+    @staticmethod
     def create_queue_button():
         names_gender = ['✅ Выполнить', '🎛 Настройка']
         builder = InlineKeyboardBuilder()
@@ -42,6 +68,20 @@ class CustomKeyboard:
         builder.button(text=f"Остановить", callback_data="stop_gpt")
 
         return builder
+
+    @staticmethod
+    def create_translator_buttons():
+
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [
+                    KeyboardButton(text='◀️ Назад'),
+                    KeyboardButton(text='📧Текст'),
+                    KeyboardButton(text='🗃 Файл')
+                ]
+                ],  resize_keyboard=True)
+
+        return keyboard
 
     @staticmethod
     def create_stop_eden_button():
@@ -137,6 +177,7 @@ class CustomKeyboard:
                     KeyboardButton(text='🤖 ChatGpt'),
                     KeyboardButton(text='🎧 Озвучка'),
                     KeyboardButton(text='🚩 Ютуб'),
+                    KeyboardButton(text='🔄 Перевод'),
                     KeyboardButton(text='🎥 Видео')
                 ]
                 ],  resize_keyboard=True)
@@ -196,6 +237,36 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Скорость оригинала', callback_data='original_speed'),
             InlineKeyboardButton(text='Скорость перевода', callback_data='translated_speed'),
         )
+        builder.row(InlineKeyboardButton(text='Нахлест', callback_data='overlap'))
+        return builder.as_markup()
+
+
+    @staticmethod
+    def inline_overlap_change():
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='Видео', callback_data='video_settings'),
+            InlineKeyboardButton(text='Субтитры', callback_data='subtitles'),
+            InlineKeyboardButton(text='🔹Перевод', callback_data='translator'),
+            InlineKeyboardButton(text='Кроп', callback_data='timestamps')
+        )
+        builder.row(
+            InlineKeyboardButton(text='100', callback_data='overlap:100'),
+            InlineKeyboardButton(text='200', callback_data='overlap:200'),
+            InlineKeyboardButton(text='300', callback_data='overlap:300'),
+            InlineKeyboardButton(text='400', callback_data='overlap:400'),
+            InlineKeyboardButton(text='500', callback_data='overlap:500'),
+        )
+        builder.row(
+            InlineKeyboardButton(text='600', callback_data='overlap:600'),
+            InlineKeyboardButton(text='700', callback_data='overlap:700'),
+            InlineKeyboardButton(text='800', callback_data='overlap:800'),
+            InlineKeyboardButton(text='900', callback_data='overlap:900'),
+            InlineKeyboardButton(text='1000', callback_data='overlap:1000'),
+        )
+        builder.row(
+            InlineKeyboardButton(text='0', callback_data='overlap:0'))
+
         return builder.as_markup()
 
 
@@ -482,11 +553,9 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Кроп', callback_data='timestamps')
         )
         builder.row(
-            InlineKeyboardButton(text='0.2', callback_data='original_speed:0.2'),
-            InlineKeyboardButton(text='0.4', callback_data='original_speed:0.4'),
-            InlineKeyboardButton(text='0.6', callback_data='original_speed:0.6'),
+            InlineKeyboardButton(text='0.5', callback_data='original_speed:0.5'),
+            InlineKeyboardButton(text='0.6', callback_data='original_speed:0.625'),
             InlineKeyboardButton(text='0.8', callback_data='original_speed:0.8'),
-            InlineKeyboardButton(text='0.9', callback_data='original_speed:0.9'),
         )
         builder.row(InlineKeyboardButton(text='1', callback_data='original_speed:1'))
         builder.row(

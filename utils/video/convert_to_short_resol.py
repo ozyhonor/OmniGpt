@@ -13,9 +13,7 @@ def change_resolution_video(title="tmp/omni_video.mp4"):
          "TmpVideo/VHQ2.mp4"],
         ["ffmpeg", "-y", "-i", "TmpVideo/VHQ2.mp4", "-vf", f"boxblur={0.6 * 10}:{0.6 * 10}", "-c:a", "copy",
          "TmpVideo/blurred.mp4"],
-        ["ffmpeg", "-y", "-i", "TmpVideo/blurred.mp4", "-i", "TmpVideo/VHQ.mp4", "-filter_complex",
-         '"[0:v][1:v]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2[outv]"', "-map", '"[outv]"', "-map", "0:a",
-         "-c:a", "copy", "TmpVideo/cropped.mp4"]
+        ["ffmpeg", "-y", "-i", "TmpVideo/blurred.mp4", "-i", "TmpVideo/VHQ.mp4", "-filter_complex", "[0:v][1:v]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2[outv]", "-map", "[outv]", "-map", "0:a", "-c:a", "copy", "TmpVideo/cropped.mp4"]
     ]
 
     for command in commands:

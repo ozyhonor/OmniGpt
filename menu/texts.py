@@ -46,6 +46,7 @@ video_settings_message = (
     '   <blockquote><b>{source_language}</b> --> <b>{translated_language}</b>\n'
     '    Скорость оригинала: <b>{original_speed}</b>\n'
     '    Скорость перевода: <b>{translation_speed}</b>\n'
+    '    Нахлест: <b>{overlap}</b>\n'
     '<i> Умные субтитры:</i> <b>{smart_sub}</b></blockquote>\n'
     '<b> Нарезать видео:</b>'
     '   <b><pre>{timestamps}</pre></b>'

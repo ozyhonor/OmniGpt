@@ -40,12 +40,14 @@ CREATE TABLE IF NOT EXISTS users (
     download_video BOOLEAN DEFAULT 0,
     download_audio BOOLEAN DEFAULT 0,
     id_youtube_panel INTEGER DEFAULT 0,
-    music TEXT DEFAULT '0',
+    music TEXT DEFAULT 'None',
     volume_music INT CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
     interesting_moment BOOLEAN DEFAULT 0,
-    video_title TEXT DEFAULT ''
+    video_title TEXT DEFAULT '',
+    overlap INTEGER DEFAULT 0
 )
 """)
 
 conn.commit()
 conn.close()
+

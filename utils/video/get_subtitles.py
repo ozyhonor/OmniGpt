@@ -19,6 +19,6 @@ def send_recognize_request(file, smart = False):
     headers = {'Authorization': f'Bearer {api_key}'}
     files = {'file': open(f'{file}', 'rb')}
     response = requests.post(url, headers=headers, data=data, files=files, proxies=proxy_config())
-    print(response)
+    print(response.text)
     with open(f'{file.replace(".mp3", format)}', 'w', encoding='utf-8') as f:
         f.write(response.text)

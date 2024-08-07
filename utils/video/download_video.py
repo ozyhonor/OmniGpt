@@ -13,7 +13,6 @@ def download_video(url: str, lang='ru') -> str:
 
     trans_table = str.maketrans('', '', string.punctuation)
     title = title.translate(trans_table).replace(' ', '_').lower()
-
     video_command = (f'yt-dlp '
                f'--username "{yt_mail_for_downloading}" '
                f'--password "{yt_pass_for_downloading}" '
