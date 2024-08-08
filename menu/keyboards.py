@@ -28,30 +28,93 @@ class CustomKeyboard:
         return builder.as_markup()
 
     @staticmethod
-    def inline_translated_languages_for_translator():
+    def inline_translated_languages_for_translator(page=0):
         builder = InlineKeyboardBuilder()
         languages = [
-            {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
-            {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
-            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
-            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
-            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+            {'code': 'af', 'flag': '🇿🇦', 'name': 'Afrikaans'},
             {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
-            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+            {'code': 'hy', 'flag': '🇦🇲', 'name': 'Armenian'},
+            {'code': 'az', 'flag': '🇦🇿', 'name': 'Azerbaijani'},
+            {'code': 'be', 'flag': '🇧🇾', 'name': 'Belarusian'},
+            {'code': 'bs', 'flag': '🇧🇦', 'name': 'Bosnian'},
+            {'code': 'bg', 'flag': '🇧🇬', 'name': 'Bulgarian'},
+            {'code': 'ca', 'flag': '🇪🇸', 'name': 'Catalan'},
+            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+            {'code': 'hr', 'flag': '🇭🇷', 'name': 'Croatian'},
+            {'code': 'cs', 'flag': '🇨🇿', 'name': 'Czech'},
+            {'code': 'da', 'flag': '🇩🇰', 'name': 'Danish'},
+            {'code': 'nl', 'flag': '🇳🇱', 'name': 'Dutch'},
+            {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
+            {'code': 'et', 'flag': '🇪🇪', 'name': 'Estonian'},
+            {'code': 'fi', 'flag': '🇫🇮', 'name': 'Finnish'},
+            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+            {'code': 'gl', 'flag': '🇪🇸', 'name': 'Galician'},
             {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
-            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+            {'code': 'el', 'flag': '🇬🇷', 'name': 'Greek'},
+            {'code': 'he', 'flag': '🇮🇱', 'name': 'Hebrew'},
             {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+            {'code': 'hu', 'flag': '🇭🇺', 'name': 'Hungarian'},
+            {'code': 'is', 'flag': '🇮🇸', 'name': 'Icelandic'},
+            {'code': 'id', 'flag': '🇮🇩', 'name': 'Indonesian'},
             {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+            {'code': 'kn', 'flag': '🇮🇳', 'name': 'Kannada'},
+            {'code': 'kk', 'flag': '🇰🇿', 'name': 'Kazakh'},
             {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
+            {'code': 'lv', 'flag': '🇱🇻', 'name': 'Latvian'},
+            {'code': 'lt', 'flag': '🇱🇹', 'name': 'Lithuanian'},
+            {'code': 'mk', 'flag': '🇲🇰', 'name': 'Macedonian'},
+            {'code': 'ms', 'flag': '🇲🇾', 'name': 'Malay'},
+            {'code': 'mr', 'flag': '🇮🇳', 'name': 'Marathi'},
+            {'code': 'mi', 'flag': '🇳🇿', 'name': 'Maori'},
+            {'code': 'ne', 'flag': '🇳🇵', 'name': 'Nepali'},
+            {'code': 'no', 'flag': '🇳🇴', 'name': 'Norwegian'},
+            {'code': 'fa', 'flag': '🇮🇷', 'name': 'Persian'},
+            {'code': 'pl', 'flag': '🇵🇱', 'name': 'Polish'},
+            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+            {'code': 'ro', 'flag': '🇷🇴', 'name': 'Romanian'},
+            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+            {'code': 'sr', 'flag': '🇷🇸', 'name': 'Serbian'},
+            {'code': 'sk', 'flag': '🇸🇰', 'name': 'Slovak'},
+            {'code': 'sl', 'flag': '🇸🇮', 'name': 'Slovenian'},
+            {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
+            {'code': 'sw', 'flag': '🇰🇪', 'name': 'Swahili'},
+            {'code': 'sv', 'flag': '🇸🇪', 'name': 'Swedish'},
+            {'code': 'tl', 'flag': '🇵🇭', 'name': 'Tagalog'},
+            {'code': 'ta', 'flag': '🇮🇳', 'name': 'Tamil'},
+            {'code': 'th', 'flag': '🇹🇭', 'name': 'Thai'},
+            {'code': 'tr', 'flag': '🇹🇷', 'name': 'Turkish'},
+            {'code': 'uk', 'flag': '🇺🇦', 'name': 'Ukrainian'},
+            {'code': 'ur', 'flag': '🇵🇰', 'name': 'Urdu'},
+            {'code': 'vi', 'flag': '🇻🇳', 'name': 'Vietnamese'},
+            {'code': 'cy', 'flag': '🏴', 'name': 'Welsh'},
         ]
-        for i in range(0, len(languages), 6):
-            row = languages[i:i + 6]
+
+        # Разбиваем на страницы
+        languages_per_page = 24
+        start = page * languages_per_page
+        end = start + languages_per_page
+        page_languages = languages[start:end]
+
+        # Добавляем кнопки языков по 6 в ряд
+        for i in range(0, len(page_languages), 6):
+            row = page_languages[i:i + 6]
             buttons_row = [
-                InlineKeyboardButton(text=language['flag'] + ' ' + language['name'],
-                                     callback_data=f'translator_dest_lang:{language["code"]}') for
-                language in row
+                InlineKeyboardButton(text=f"{language['flag']} {language['name']}",
+                                     callback_data=f'translator_dest_lang:{language["code"]}')
+                for language in row
             ]
             builder.row(*buttons_row)
+
+        # Добавляем навигационные кнопки
+        navigation_buttons = []
+        if page > 0:
+            navigation_buttons.append(InlineKeyboardButton(text='⬅️ Назад', callback_data=f'page:{page - 1}'))
+        if end < len(languages):
+            navigation_buttons.append(InlineKeyboardButton(text='➡️ Вперед', callback_data=f'page:{page + 1}'))
+        if navigation_buttons:
+            builder.row(*navigation_buttons)
+
         return builder.as_markup()
     @staticmethod
     def create_queue_button():

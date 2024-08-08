@@ -1,9 +1,11 @@
-# Игнорировать все файлы в корневой директории, кроме указанных
 /*
+!TmpVideo/
+!video/
 !spawnbot.py
 !requirements.txt
 !loader.py
 !config_reader.py
+!audio_files/
 !db/
 !fonts/
 !handlers/
@@ -16,6 +18,7 @@
 
 # Игнорировать временные файлы и директории
 *.pyc
+db/users_.db
 __pycache__/
 *.pyo
 *.pyd

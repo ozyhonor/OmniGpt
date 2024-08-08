@@ -40,19 +40,64 @@ translator_router = Router()
 async def create_gpt_request_for_request(message: Message):
     db.connect()
     languages = [
-            {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
-            {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
-            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
-            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
-            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
-            {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
-            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
-            {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
-            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
-            {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
-            {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
-            {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
-        ]
+        {'code': 'af', 'flag': '🇿🇦', 'name': 'Afrikaans'},
+        {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
+        {'code': 'hy', 'flag': '🇦🇲', 'name': 'Armenian'},
+        {'code': 'az', 'flag': '🇦🇿', 'name': 'Azerbaijani'},
+        {'code': 'be', 'flag': '🇧🇾', 'name': 'Belarusian'},
+        {'code': 'bs', 'flag': '🇧🇦', 'name': 'Bosnian'},
+        {'code': 'bg', 'flag': '🇧🇬', 'name': 'Bulgarian'},
+        {'code': 'ca', 'flag': '🇪🇸', 'name': 'Catalan'},
+        {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+        {'code': 'hr', 'flag': '🇭🇷', 'name': 'Croatian'},
+        {'code': 'cs', 'flag': '🇨🇿', 'name': 'Czech'},
+        {'code': 'da', 'flag': '🇩🇰', 'name': 'Danish'},
+        {'code': 'nl', 'flag': '🇳🇱', 'name': 'Dutch'},
+        {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
+        {'code': 'et', 'flag': '🇪🇪', 'name': 'Estonian'},
+        {'code': 'fi', 'flag': '🇫🇮', 'name': 'Finnish'},
+        {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+        {'code': 'gl', 'flag': '🇪🇸', 'name': 'Galician'},
+        {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
+        {'code': 'el', 'flag': '🇬🇷', 'name': 'Greek'},
+        {'code': 'he', 'flag': '🇮🇱', 'name': 'Hebrew'},
+        {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+        {'code': 'hu', 'flag': '🇭🇺', 'name': 'Hungarian'},
+        {'code': 'is', 'flag': '🇮🇸', 'name': 'Icelandic'},
+        {'code': 'id', 'flag': '🇮🇩', 'name': 'Indonesian'},
+        {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+        {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+        {'code': 'kn', 'flag': '🇮🇳', 'name': 'Kannada'},
+        {'code': 'kk', 'flag': '🇰🇿', 'name': 'Kazakh'},
+        {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
+        {'code': 'lv', 'flag': '🇱🇻', 'name': 'Latvian'},
+        {'code': 'lt', 'flag': '🇱🇹', 'name': 'Lithuanian'},
+        {'code': 'mk', 'flag': '🇲🇰', 'name': 'Macedonian'},
+        {'code': 'ms', 'flag': '🇲🇾', 'name': 'Malay'},
+        {'code': 'mr', 'flag': '🇮🇳', 'name': 'Marathi'},
+        {'code': 'mi', 'flag': '🇳🇿', 'name': 'Maori'},
+        {'code': 'ne', 'flag': '🇳🇵', 'name': 'Nepali'},
+        {'code': 'no', 'flag': '🇳🇴', 'name': 'Norwegian'},
+        {'code': 'fa', 'flag': '🇮🇷', 'name': 'Persian'},
+        {'code': 'pl', 'flag': '🇵🇱', 'name': 'Polish'},
+        {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+        {'code': 'ro', 'flag': '🇷🇴', 'name': 'Romanian'},
+        {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+        {'code': 'sr', 'flag': '🇷🇸', 'name': 'Serbian'},
+        {'code': 'sk', 'flag': '🇸🇰', 'name': 'Slovak'},
+        {'code': 'sl', 'flag': '🇸🇮', 'name': 'Slovenian'},
+        {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
+        {'code': 'sw', 'flag': '🇰🇪', 'name': 'Swahili'},
+        {'code': 'sv', 'flag': '🇸🇪', 'name': 'Swedish'},
+        {'code': 'tl', 'flag': '🇵🇭', 'name': 'Tagalog'},
+        {'code': 'ta', 'flag': '🇮🇳', 'name': 'Tamil'},
+        {'code': 'th', 'flag': '🇹🇭', 'name': 'Thai'},
+        {'code': 'tr', 'flag': '🇹🇷', 'name': 'Turkish'},
+        {'code': 'uk', 'flag': '🇺🇦', 'name': 'Ukrainian'},
+        {'code': 'ur', 'flag': '🇵🇰', 'name': 'Urdu'},
+        {'code': 'vi', 'flag': '🇻🇳', 'name': 'Vietnamese'},
+        {'code': 'cy', 'flag': '🏴', 'name': 'Welsh'},
+    ]
     user_id = message.from_user.id
     dest_lang = db.get_user_settings('dest_lang',user_id)
     for language in languages:
@@ -69,6 +114,21 @@ async def create_gpt_request_for_request(message: Message):
     db.update_user_settings('translator_id_panel', id_translator_panel, user_id)
     db.disconnect()
 
+@translator_router.callback_query(lambda callback_query: callback_query.data.startswith('page:'))
+async def process_page_navigation(callback_query: types.CallbackQuery):
+    # Извлекаем номер страницы из callback_data
+    page = int(callback_query.data.split(':')[1])
+
+    # Создаем обновленную клавиатуру с выбранной страницей
+    keyboard = keyboards.CustomKeyboard.inline_translated_languages_for_translator(page=page)
+
+    # Обновляем сообщение с новой клавиатурой
+    await callback_query.message.edit_reply_markup(reply_markup=keyboard)
+
+    # Отвечаем на callback, чтобы убрать индикатор загрузки
+    await callback_query.answer()
+
+
 
 @translator_router.callback_query(lambda callback_query: callback_query.data.startswith('translator_dest_lang:'))
 async def process_overlap_value_button(callback_query: types.CallbackQuery):
@@ -78,19 +138,64 @@ async def process_overlap_value_button(callback_query: types.CallbackQuery):
     panel_id = db.get_user_settings('translator_id_panel', user_id)
     db.update_user_settings(key='dest_lang', value=dest, user_id=user_id)
     languages = [
-            {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
-            {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
-            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
-            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
-            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
-            {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
-            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
-            {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
-            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
-            {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
-            {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
-            {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
-        ]
+        {'code': 'af', 'flag': '🇿🇦', 'name': 'Afrikaans'},
+        {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
+        {'code': 'hy', 'flag': '🇦🇲', 'name': 'Armenian'},
+        {'code': 'az', 'flag': '🇦🇿', 'name': 'Azerbaijani'},
+        {'code': 'be', 'flag': '🇧🇾', 'name': 'Belarusian'},
+        {'code': 'bs', 'flag': '🇧🇦', 'name': 'Bosnian'},
+        {'code': 'bg', 'flag': '🇧🇬', 'name': 'Bulgarian'},
+        {'code': 'ca', 'flag': '🇪🇸', 'name': 'Catalan'},
+        {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+        {'code': 'hr', 'flag': '🇭🇷', 'name': 'Croatian'},
+        {'code': 'cs', 'flag': '🇨🇿', 'name': 'Czech'},
+        {'code': 'da', 'flag': '🇩🇰', 'name': 'Danish'},
+        {'code': 'nl', 'flag': '🇳🇱', 'name': 'Dutch'},
+        {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
+        {'code': 'et', 'flag': '🇪🇪', 'name': 'Estonian'},
+        {'code': 'fi', 'flag': '🇫🇮', 'name': 'Finnish'},
+        {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+        {'code': 'gl', 'flag': '🇪🇸', 'name': 'Galician'},
+        {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
+        {'code': 'el', 'flag': '🇬🇷', 'name': 'Greek'},
+        {'code': 'he', 'flag': '🇮🇱', 'name': 'Hebrew'},
+        {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+        {'code': 'hu', 'flag': '🇭🇺', 'name': 'Hungarian'},
+        {'code': 'is', 'flag': '🇮🇸', 'name': 'Icelandic'},
+        {'code': 'id', 'flag': '🇮🇩', 'name': 'Indonesian'},
+        {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+        {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+        {'code': 'kn', 'flag': '🇮🇳', 'name': 'Kannada'},
+        {'code': 'kk', 'flag': '🇰🇿', 'name': 'Kazakh'},
+        {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
+        {'code': 'lv', 'flag': '🇱🇻', 'name': 'Latvian'},
+        {'code': 'lt', 'flag': '🇱🇹', 'name': 'Lithuanian'},
+        {'code': 'mk', 'flag': '🇲🇰', 'name': 'Macedonian'},
+        {'code': 'ms', 'flag': '🇲🇾', 'name': 'Malay'},
+        {'code': 'mr', 'flag': '🇮🇳', 'name': 'Marathi'},
+        {'code': 'mi', 'flag': '🇳🇿', 'name': 'Maori'},
+        {'code': 'ne', 'flag': '🇳🇵', 'name': 'Nepali'},
+        {'code': 'no', 'flag': '🇳🇴', 'name': 'Norwegian'},
+        {'code': 'fa', 'flag': '🇮🇷', 'name': 'Persian'},
+        {'code': 'pl', 'flag': '🇵🇱', 'name': 'Polish'},
+        {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+        {'code': 'ro', 'flag': '🇷🇴', 'name': 'Romanian'},
+        {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+        {'code': 'sr', 'flag': '🇷🇸', 'name': 'Serbian'},
+        {'code': 'sk', 'flag': '🇸🇰', 'name': 'Slovak'},
+        {'code': 'sl', 'flag': '🇸🇮', 'name': 'Slovenian'},
+        {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
+        {'code': 'sw', 'flag': '🇰🇪', 'name': 'Swahili'},
+        {'code': 'sv', 'flag': '🇸🇪', 'name': 'Swedish'},
+        {'code': 'tl', 'flag': '🇵🇭', 'name': 'Tagalog'},
+        {'code': 'ta', 'flag': '🇮🇳', 'name': 'Tamil'},
+        {'code': 'th', 'flag': '🇹🇭', 'name': 'Thai'},
+        {'code': 'tr', 'flag': '🇹🇷', 'name': 'Turkish'},
+        {'code': 'uk', 'flag': '🇺🇦', 'name': 'Ukrainian'},
+        {'code': 'ur', 'flag': '🇵🇰', 'name': 'Urdu'},
+        {'code': 'vi', 'flag': '🇻🇳', 'name': 'Vietnamese'},
+        {'code': 'cy', 'flag': '🏴', 'name': 'Welsh'},
+    ]
     dest = db.get_user_settings('dest_lang',user_id)
     for language in languages:
         if language['code'].lower() == dest.lower():
