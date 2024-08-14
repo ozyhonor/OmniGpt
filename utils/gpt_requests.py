@@ -26,6 +26,7 @@ async def file_request(chunks, message, settings):
     start_time = time()
     user_id = message.from_user.id
     degree = db.get_degree(user_id)
+    model = db.get_user_settings('gpt_model', user_id)
     if settings == None:
         settings = db.get_settings(user_id)
 
@@ -39,7 +40,7 @@ async def file_request(chunks, message, settings):
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
 
-            future = [executor.submit(solo_request, chunk, message, degree, settings, proxy) for chunk in chunks]
+            future = [executor.submit(solo_request, chunk, message, degree, settings, proxy, model) for chunk in chunks]
             for future in concurrent.futures.as_completed(future):
                 answer = str(future.result()[1]).replace('\n', '. ')
                 answers.append(answer)
@@ -86,7 +87,7 @@ async def _handle_exception(answers, message):
             file.write(answer + "\n\n")
 
 
-def solo_request(text, message, degree, settings, proxy):
+def solo_request(text, message, degree, settings, proxy, model='gpt-3.5-turbo'):
     start_time = time()
     """
     text_request does request from gpt. Single request 200 - 400
@@ -95,7 +96,7 @@ def solo_request(text, message, degree, settings, proxy):
     :return: list[float(time_answer), str(answer)]
     """
 
-    basic_settings = 'Ты модель gpt 3-5 turbo'
+    basic_settings = f'Ты модель {model}'
     api_key = choice(gpt_tokens)
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
@@ -103,7 +104,7 @@ def solo_request(text, message, degree, settings, proxy):
         "Authorization": f"Bearer {api_key}"
     }
     data = {
-        "model": "gpt-3.5-turbo",
+        "model": f"{model}",
         "messages": [
             {"role": "system", "content": f"{settings or basic_settings}"},
             {"role": "user", "content": f"{text or message.text}"}

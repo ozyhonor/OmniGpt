@@ -19,7 +19,7 @@ from moviepy.editor import AudioFileClip, concatenate_audioclips
 attempts = 0
 
 
-def openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_config(), model='tts-1-hd'):
+def openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_config(), model='tts-1'):
     global attempts
     start_time = time()
     api_key = choice(gpt_tokens)
@@ -41,7 +41,6 @@ def openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_conf
             file.write(response.content)
     except Exception as e:
         print(e)
-        return openai_audio_request(voice, input_text, output_file, speed, proxy=proxy_config(), model='tts-1')
 
     return [output_file, round(time()-start_time,2)]
 
@@ -61,9 +60,9 @@ async def file_request(chunks, message):
     msg = await message.answer(f'<b>Процесс работы:</b> <i>0/{len(chunks)}</i>')
     result: bool = await bot.send_chat_action(user_id, 'record_voice')
     try:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
 
-            future = [executor.submit(openai_audio_request, voice, chunk, f'audio_files/{name}.mp3', rate, proxy) for name,chunk in enumerate(chunks)]
+            future = [executor.submit(openai_audio_request, voice, chunk, f'audio_files/{name}.mp3', rate, proxy_config()) for name,chunk in enumerate(chunks)]
             for future in concurrent.futures.as_completed(future):
                 answer = str(future.result()[0])
                 answers.append(answer)

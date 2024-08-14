@@ -23,7 +23,9 @@ async def process_message_gpt_request(message: Message, state: FSMContext) -> No
 async def go_gpt_text_request(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     db.connect()
-    answer = solo_request(None, message, db.get_degree(user_id), None, None)
+    degree = db.get_degree(user_id)
+    model = db.get_user_settings('gpt_model', user_id)
+    answer = solo_request(None, message, degree, None, None, model)
     db.disconnect()
     print(answer[1])
     await message.answer(texts.water_mark_omnigpt.format(answer[0]))

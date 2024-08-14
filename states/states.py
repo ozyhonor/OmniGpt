@@ -60,5 +60,6 @@ class WaitingStateGpt(StatesGroup):
     settings = State()
     text_gpt = State()
     file_gpt = State()
+    model = State()
     degree = State()
     theme = State()

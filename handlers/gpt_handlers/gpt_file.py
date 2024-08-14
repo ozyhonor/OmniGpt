@@ -7,6 +7,7 @@ from aiogram.types.input_file import FSInputFile
 from states.states import WaitingStateGpt
 from spawnbot import bot
 from menu import keyboards, texts
+from db.database import db
 import os
 from utils.sort_file import sort_and_filter
 from utils.decode_any_format import detect_file_format
@@ -33,7 +34,8 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     """
     states.states.stop_gpt = False
     markup = keyboards.CustomKeyboard.create_stop_button().as_markup()
-    result: bool = await bot.send_chat_action(message.from_user.id, 'upload_document')
+    user_id = message.from_user.id
+    result: bool = await bot.send_chat_action(user_id, 'upload_document')
     file_id = message.document.file_id
     file = await bot.get_file(file_id)
     print(file)
@@ -42,9 +44,10 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
-
-    chunks = split_text(text)
-
+    db.connect()
+    model = db.get_user_settings('gpt_model', user_id)
+    chunks = split_text(text, model=model)
+    db.disconnect()
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
     answer = await file_request(chunks, message, settings)

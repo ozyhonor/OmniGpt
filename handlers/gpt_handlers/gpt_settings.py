@@ -19,6 +19,41 @@ async def change_gpt_settings(callback_query: CallbackQuery, state: FSMContext) 
     db.disconnect()
 
 
+@gpt_settings.callback_query(lambda callback_query: callback_query.data == 'gpt_back_to_main_markup')
+async def back_from_model_menu(callback_query: CallbackQuery, state: FSMContext) -> None:
+    db.connect()
+    user_id = callback_query.from_user.id
+    message_id = callback_query.message.message_id
+    await state.clear()
+    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
+    await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
+    db.disconnect()
+
+
+@gpt_settings.callback_query(F.data == '🤖 Модель')
+async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
+    db.connect()
+    user_id = callback_query.from_user.id
+    message_id = callback_query.message.message_id
+    markup = keyboards.CustomKeyboard.create_model_gpt()
+    await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
+    db.disconnect()
+
+
+@gpt_settings.callback_query(lambda callback_query: callback_query.data.startswith('gpt_model:'))
+async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
+    db.connect()
+    user_id = callback_query.from_user.id
+    model = callback_query.data.split(':')[1]
+    panel_id = db.get_user_settings('id_gpt_panel', user_id)
+    message_id = callback_query.message.message_id
+    db.update_user_settings('gpt_model', model, user_id)
+    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=reload_settings(user_id))
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    db.disconnect()
+
+
 @gpt_settings.message(WaitingStateGpt.settings)
 async def process_settings(message: Message, state: FSMContext) -> None:
     user_id, settings = message.from_user.id, message.text
@@ -71,6 +106,7 @@ def reload_settings(user_id):
     db.connect()
 
     new_settings = texts.settings_request.format(db.get_user_settings('gpt', user_id),
-                                                 db.get_user_settings('degree', user_id))
+                                                 db.get_user_settings('degree', user_id),
+                                                 db.get_user_settings('gpt_model', user_id))
     db.disconnect()
     return new_settings

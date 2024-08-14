@@ -44,7 +44,10 @@ CREATE TABLE IF NOT EXISTS users (
     volume_music INT CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
     interesting_moment BOOLEAN DEFAULT 0,
     video_title TEXT DEFAULT '',
-    overlap INTEGER DEFAULT 0
+    overlap INTEGER DEFAULT 0,
+    gpt_model TEXT DEFAULT 'gpt-3.5-turbo',
+    dest_lang TEXT DEFAULT 'en',
+    translator_id_panel INTEGER DEFAULT 0
 )
 """)
 

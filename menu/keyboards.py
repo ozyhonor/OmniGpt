@@ -11,8 +11,20 @@ class CustomKeyboard:
 
 
     @staticmethod
+    def create_model_gpt():
+        builder = InlineKeyboardBuilder()
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='💪 gpt-3.5-turbo', callback_data='gpt_model:gpt-3.5-turbo'),
+            InlineKeyboardButton(text='🦾 gpt-4', callback_data='gpt_model:gpt-4')
+        )
+        builder.row(InlineKeyboardButton(text='◀️ Назад', callback_data='gpt_back_to_main_markup'))
+
+        return builder.as_markup()
+
+    @staticmethod
     def create_inline_kb_gpt_settings():
-        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус']
+        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель']
         builder = InlineKeyboardBuilder()
         for name in names_settings_gpt:
             builder.button(text=f"{name}", callback_data=f"{name}")

@@ -96,7 +96,7 @@ rate_edel = """
 
 
 settings_request = """
-<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<b>Температура ответа:</b>\n<blockquote><i>{1}</i></blockquote>
+<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<b>Температура ответа:</b>\n<blockquote><i>{1}</i></blockquote>\n<blockquote><i>{2}</i></blockquote>
 """
 
 water_mark_omnigpt = """
