@@ -1,3 +1,5 @@
+import re
+
 
 video_stamps = 'Пожалуйста, введите временные метки для нарезки видео в формате примера: 1:21-3:54. Если временная метка превышает один час, пожалуйста, укажите ее в формате 66:21-72:48.'
 
@@ -25,36 +27,59 @@ youtube_download_settings = ('<b>Скачать с Youtube:</b>'
 wait_youtube_link = '<b>Ожидается ссылка на ютуб контент</b>'
 
 video_settings_message = (
-    '<b>Настройки видео:</b>\n'
-    '<blockquote>Музыка: <b>{music}</b>\n'
-    'Громкость музыки: <b>{music_volume}</b>\n'
-    'Заголовок видео: <b>{video_title}</b>\n'
-    'Разрешение: <b>{resolution}</b></blockquote>\n'
-    '<b>Субтитры:</b><b>{subtitles}</b>\n'
-    '<blockquote>    Шрифт: <b>{font}</b>\n'
-    '    Размер: <b>{size}</b>\n'
-    '    Цвет: <b>{color}</b>\n'
-    '    Максимум слов: <b>{max_words}</b>\n'
-    '    Позиция: <b>{position}</b>\n'
-    '    Обводка: <b>{outline}</b>\n'
-    '    ---Размер: <b>{outline_size}</b>\n'
-    '    ---Цвет: <b>{outline_color}</b>\n'
-    '    Тень: <b>{shadow}</b>\n'
-    '    ---Размер: <b>{shadow_size}</b>\n'
-    '    ---Цвет: <b>{shadow_color}</b></blockquote>\n'
-    '<b>Переводчик:</b> <b>{translator}</b>'
-    '   <blockquote><b>{source_language}</b> --> <b>{translated_language}</b>\n'
-    '    Скорость оригинала: <b>{original_speed}</b>\n'
-    '    Скорость перевода: <b>{translation_speed}</b>\n'
-    '    Нахлест: <b>{overlap}</b>\n'
-    '<i> Умные субтитры:</i> <b>{smart_sub}</b></blockquote>\n'
-    '<b> Нарезать видео:</b>'
-    '   <b><pre>{timestamps}</pre></b>'
+'''
+Ваши настройки
+Разрешение: {resolution}
+Добавить субтитры: {subtitles}
+Шрифт: {font}
+Размер: {size}
+Цвет: {color}
+Максимум слов: {max_words}
+Позиция: {position}
+Добавить обводку субтитрам: {outline}
+Размер обводки: {outline_size}
+Цвет обводки: {outline_color}
+Добавить тень субтитрам: {shadow}
+Цвет тени: {shadow_color}
+Добавить переводчик: {translator}
+Язык перевода: {translated_language}
+Скорость оригинала: {original_speed}
+Скорость перевода: {translation_speed}
+Нахлёст: {overlap}
+Умные субтитры: {smart_sub}
+Нарезать видео: {timestamps}
+'''
 )
+
+translator_text_panel = '<b><blockquote>Перевести на {0} {1}</blockquote></b>\n<b><blockquote>{2}/5</blockquote></b>'
 
 write_gpt_settings = """
 <b>Введите настройки запроса</b>
 """
+
+
+settings_sample_pattern = {
+    'resolution': re.compile(r'Разрешение:\s*((\d+x\d+)|(Original|original))'),
+    'subtitles': re.compile(r'Добавить субтитры:\s*(✅|❌|1|0)'),
+    'font': re.compile(r'Шрифт:\s*(.+)'),
+    'size': re.compile(r'Размер:\s*(\d+)'),
+    'primary_color': re.compile(r'Цвет:\s*(\d{1,3},\d{1,3},\d{1,3},\d{1,3})'),
+    'max_words': re.compile(r'Максимум слов:\s*(\d+)'),
+    'position': re.compile(r'Позиция:\s*(\w+)'),
+    'outline': re.compile(r'Добавить обводку субтитрам:\s*(✅|❌|1|0)'),
+    'outline_size': re.compile(r'Размер обводки:\s*(\d+)'),
+    'outline_color': re.compile(r'Цвет обводки:\s*(\d{1,3},\d{1,3},\d{1,3},\d{1,3})'),
+    'background': re.compile(r'Добавить тень субтитрам:\s*(✅|❌|1|0)'),
+    'shadow_color': re.compile(r'Цвет тени:\s*(\d{1,3},\d{1,3},\d{1,3},\d{1,3})'),
+    'translator': re.compile(r'Добавить переводчик:\s*(✅|❌|1|0)'),
+    'translated_language': re.compile(r'Язык перевода:\s*(\w+)'),
+    'original_speed': re.compile(r'Скорость оригинала:\s*([\d.]+)'),
+    'translation_speed': re.compile(r'Скорость перевода:\s*([\d.]+)'),
+    'overlap': re.compile(r'Нахлёст:\s*(\d+)'),
+    'smart_sub': re.compile(r'Умные субтитры:\s*(✅|❌|1|0)'),
+    'timestamps': re.compile(r'Нарезать видео:\s*(\d+)')
+}
+
 
 default_settings_gpt = """
 Анализируй текст на предмет голословных утверждений.
@@ -94,6 +119,65 @@ rate_edel = """
 <b>Введите число в диапазоне [1:2]</b>
 """
 
+languages = [
+        {'code': 'af', 'flag': '🇿🇦', 'name': 'Afrikaans'},
+        {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
+        {'code': 'hy', 'flag': '🇦🇲', 'name': 'Armenian'},
+        {'code': 'az', 'flag': '🇦🇿', 'name': 'Azerbaijani'},
+        {'code': 'be', 'flag': '🇧🇾', 'name': 'Belarusian'},
+        {'code': 'bs', 'flag': '🇧🇦', 'name': 'Bosnian'},
+        {'code': 'bg', 'flag': '🇧🇬', 'name': 'Bulgarian'},
+        {'code': 'ca', 'flag': '🇪🇸', 'name': 'Catalan'},
+        {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+        {'code': 'hr', 'flag': '🇭🇷', 'name': 'Croatian'},
+        {'code': 'cs', 'flag': '🇨🇿', 'name': 'Czech'},
+        {'code': 'da', 'flag': '🇩🇰', 'name': 'Danish'},
+        {'code': 'nl', 'flag': '🇳🇱', 'name': 'Dutch'},
+        {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
+        {'code': 'et', 'flag': '🇪🇪', 'name': 'Estonian'},
+        {'code': 'fi', 'flag': '🇫🇮', 'name': 'Finnish'},
+        {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+        {'code': 'gl', 'flag': '🇪🇸', 'name': 'Galician'},
+        {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
+        {'code': 'el', 'flag': '🇬🇷', 'name': 'Greek'},
+        {'code': 'he', 'flag': '🇮🇱', 'name': 'Hebrew'},
+        {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+        {'code': 'hu', 'flag': '🇭🇺', 'name': 'Hungarian'},
+        {'code': 'is', 'flag': '🇮🇸', 'name': 'Icelandic'},
+        {'code': 'id', 'flag': '🇮🇩', 'name': 'Indonesian'},
+        {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+        {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+        {'code': 'kn', 'flag': '🇮🇳', 'name': 'Kannada'},
+        {'code': 'kk', 'flag': '🇰🇿', 'name': 'Kazakh'},
+        {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
+        {'code': 'lv', 'flag': '🇱🇻', 'name': 'Latvian'},
+        {'code': 'lt', 'flag': '🇱🇹', 'name': 'Lithuanian'},
+        {'code': 'mk', 'flag': '🇲🇰', 'name': 'Macedonian'},
+        {'code': 'ms', 'flag': '🇲🇾', 'name': 'Malay'},
+        {'code': 'mr', 'flag': '🇮🇳', 'name': 'Marathi'},
+        {'code': 'mi', 'flag': '🇳🇿', 'name': 'Maori'},
+        {'code': 'ne', 'flag': '🇳🇵', 'name': 'Nepali'},
+        {'code': 'no', 'flag': '🇳🇴', 'name': 'Norwegian'},
+        {'code': 'fa', 'flag': '🇮🇷', 'name': 'Persian'},
+        {'code': 'pl', 'flag': '🇵🇱', 'name': 'Polish'},
+        {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+        {'code': 'ro', 'flag': '🇷🇴', 'name': 'Romanian'},
+        {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+        {'code': 'sr', 'flag': '🇷🇸', 'name': 'Serbian'},
+        {'code': 'sk', 'flag': '🇸🇰', 'name': 'Slovak'},
+        {'code': 'sl', 'flag': '🇸🇮', 'name': 'Slovenian'},
+        {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
+        {'code': 'sw', 'flag': '🇰🇪', 'name': 'Swahili'},
+        {'code': 'sv', 'flag': '🇸🇪', 'name': 'Swedish'},
+        {'code': 'tl', 'flag': '🇵🇭', 'name': 'Tagalog'},
+        {'code': 'ta', 'flag': '🇮🇳', 'name': 'Tamil'},
+        {'code': 'th', 'flag': '🇹🇭', 'name': 'Thai'},
+        {'code': 'tr', 'flag': '🇹🇷', 'name': 'Turkish'},
+        {'code': 'uk', 'flag': '🇺🇦', 'name': 'Ukrainian'},
+        {'code': 'ur', 'flag': '🇵🇰', 'name': 'Urdu'},
+        {'code': 'vi', 'flag': '🇻🇳', 'name': 'Vietnamese'},
+        {'code': 'cy', 'flag': '🏴', 'name': 'Welsh'},
+    ]
 
 settings_request = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<b>Температура ответа:</b>\n<blockquote><i>{1}</i></blockquote>\n<blockquote><i>{2}</i></blockquote>

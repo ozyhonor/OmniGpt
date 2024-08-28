@@ -11,60 +11,56 @@ gpt_settings = Router()
 
 @gpt_settings.callback_query(F.data == '⚙️ Настройки')
 async def change_gpt_settings(callback_query: CallbackQuery, state: FSMContext) -> None:
-    db.connect()
     user_id = callback_query.from_user.id
     await state.set_state(WaitingStateGpt.settings)
-    markup = keyboards.CustomKeyboard.create_inline_kb_default_settings()
+    markup = keyboards.ChatGpt.create_inline_kb_default_settings()
     await bot.send_message(user_id, texts.write_gpt_settings, reply_markup=markup)
-    db.disconnect()
+
 
 
 @gpt_settings.callback_query(lambda callback_query: callback_query.data == 'gpt_back_to_main_markup')
 async def back_from_model_menu(callback_query: CallbackQuery, state: FSMContext) -> None:
-    db.connect()
     user_id = callback_query.from_user.id
     message_id = callback_query.message.message_id
     await state.clear()
-    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
+    markup = keyboards.ChatGpt.create_gpt_settings()
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
-    db.disconnect()
+
 
 
 @gpt_settings.callback_query(F.data == '🤖 Модель')
 async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
-    db.connect()
     user_id = callback_query.from_user.id
     message_id = callback_query.message.message_id
-    markup = keyboards.CustomKeyboard.create_model_gpt()
+    markup = keyboards.ChatGpt.create_gpt_model_settings()
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
-    db.disconnect()
 
 
 @gpt_settings.callback_query(lambda callback_query: callback_query.data.startswith('gpt_model:'))
 async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
-    db.connect()
     user_id = callback_query.from_user.id
     model = callback_query.data.split(':')[1]
-    panel_id = db.get_user_settings('id_gpt_panel', user_id)
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
     message_id = callback_query.message.message_id
-    db.update_user_settings('gpt_model', model, user_id)
-    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
-    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=reload_settings(user_id))
+    await db.update_user_setting('gpt_model', model, user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings()
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
-    db.disconnect()
+
 
 
 @gpt_settings.message(WaitingStateGpt.settings)
 async def process_settings(message: Message, state: FSMContext) -> None:
     user_id, settings = message.from_user.id, message.text
-    db.connect()
-    panel_id = db.get_user_settings('id_gpt_panel', user_id)
-    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
-    db.add_settings(user_id=user_id, settings=settings)
-    db.disconnect()
+
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings()
+    await db.update_user_setting('gpt', settings, user_id)
     await message.delete()
     await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
-    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=reload_settings(user_id))
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await state.clear()
 
@@ -80,33 +76,30 @@ async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) ->
 
 @gpt_settings.message(WaitingStateGpt.degree)
 async def process_degree(message: Message, state: FSMContext) -> None:
-    db.connect()
     user_id = message.from_user.id
-    panel_id = db.get_user_settings('id_gpt_panel', user_id)
-    markup = keyboards.CustomKeyboard.create_inline_kb_gpt_settings().as_markup()
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings()
     try:
         degree = float(message.text)
 
         if not(0<=degree and degree<=1):
             raise ValueError
-        db.connect()
-        db.add_degree(user_id, degree)
-        db.disconnect()
+        await db.update_user_setting('degree', degree, user_id)
         await message.delete()
         await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
-        await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=reload_settings(user_id))
+        new_text_settings = await reload_settings(user_id)
+        await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
         await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
         await state.clear()
     except ValueError:
         print('123123')
-        db.disconnect()
-    db.disconnect()
 
-def reload_settings(user_id):
-    db.connect()
 
-    new_settings = texts.settings_request.format(db.get_user_settings('gpt', user_id),
-                                                 db.get_user_settings('degree', user_id),
-                                                 db.get_user_settings('gpt_model', user_id))
-    db.disconnect()
+async def reload_settings(user_id):
+    settings = await db.get_user_setting('gpt', user_id)
+    degree = await db.get_user_setting('degree', user_id)
+    gpt_model = await db.get_user_setting('gpt_model', user_id)
+    new_settings = texts.settings_request.format(settings,
+                                                 degree,
+                                                 gpt_model)
     return new_settings

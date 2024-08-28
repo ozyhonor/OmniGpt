@@ -1,10 +1,6 @@
-from moviepy.editor import VideoFileClip
-import os
 import math
-from moviepy.editor import AudioFileClip
-from pydub import AudioSegment
-from utils.video.get_subtitles import send_recognize_request
-from utils.convert_json_to_srt import json_to_srt
+from utils.video.local_requests.get_subtitles import send_recognize_request
+from utils.video.support_scripts.convert_json_to_srt import json_to_srt
 import subprocess
 from moviepy.editor import VideoFileClip
 import shutil

@@ -15,14 +15,14 @@ premium_router = Router()
 
 @premium_router.message(F.text == '🙏 Доступ')
 async def send_request_for_access(message: Message) -> None:
-    db.connect()
-    if db.is_user_exist(message.from_user.id):
+    user_id = message.from_user.id
+    is_user_exist_value = await db.is_user_exist(user_id)
+    if is_user_exist_value:
         markup = CustomKeyboard.create_reply_main_menu()
         await message.answer(f"🧊 <b>{message.from_user.full_name} у Вас есть доступ!</b> 🧊", reply_markup=markup)
     else:
         reply = CustomKeyboard.create_acsess().as_markup()
         await bot.send_message(chat_id=admin_id, text=f'Запросили доступ! \nid:{message.from_user.id} \nname:{message.from_user.full_name}', reply_markup=reply)
-    db.disconnect()
 
 @premium_router.callback_query(F.data == '✅ ᚢᚹᛋᚺᚱᛠⰓ')
 async def accept_new_user(callback_query: CallbackQuery, state: FSMContext) -> None:
@@ -32,9 +32,7 @@ async def accept_new_user(callback_query: CallbackQuery, state: FSMContext) -> N
 
 @premium_router.message(WaitingPremium.new_premium_id)
 async def add_new_premium_user(message: Message, state: FSMContext):
-    db.connect()
-    db.add_user(message.text)
-    db.disconnect()
+    await db.add_new_user(message.text)
     markup = CustomKeyboard.create_reply_main_menu()
     await state.clear()
     await message.answer('Пользователь добавлен')

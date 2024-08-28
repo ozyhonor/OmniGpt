@@ -3,16 +3,10 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 import os
 
 
-
-
-class CustomKeyboard:
-    def __init__(self):
-        self.reply_markup = None
-
+class ChatGpt:
 
     @staticmethod
-    def create_model_gpt():
-        builder = InlineKeyboardBuilder()
+    def create_gpt_model_settings():
         builder = InlineKeyboardBuilder()
         builder.row(
             InlineKeyboardButton(text='💪 gpt-3.5-turbo', callback_data='gpt_model:gpt-3.5-turbo'),
@@ -23,21 +17,30 @@ class CustomKeyboard:
         return builder.as_markup()
 
     @staticmethod
-    def create_inline_kb_gpt_settings():
-        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель']
+    def create_gpt_settings():
         builder = InlineKeyboardBuilder()
+        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель']
         for name in names_settings_gpt:
             builder.button(text=f"{name}", callback_data=f"{name}")
 
-        return builder
+        return builder.as_markup()
 
     @staticmethod
     def create_inline_kb_default_settings():
-
         builder = InlineKeyboardBuilder()
         builder.button(text=f"Оставить текущие настройки.", callback_data="video_cancel")
 
         return builder.as_markup()
+
+
+class TranslatorButtons():
+    def __init__(self):
+        builder = InlineKeyboardBuilder()
+
+class CustomKeyboard:
+    def __init__(self):
+        reply_markup = None
+
 
     @staticmethod
     def inline_translated_languages_for_translator(page=0):
@@ -103,14 +106,14 @@ class CustomKeyboard:
         ]
 
         # Разбиваем на страницы
-        languages_per_page = 24
+        languages_per_page = 12
         start = page * languages_per_page
         end = start + languages_per_page
         page_languages = languages[start:end]
 
         # Добавляем кнопки языков по 6 в ряд
-        for i in range(0, len(page_languages), 6):
-            row = page_languages[i:i + 6]
+        for i in range(0, len(page_languages), 4):
+            row = page_languages[i:i + 4]
             buttons_row = [
                 InlineKeyboardButton(text=f"{language['flag']} {language['name']}",
                                      callback_data=f'translator_dest_lang:{language["code"]}')
@@ -294,6 +297,7 @@ class CustomKeyboard:
         builder.row(
             InlineKeyboardButton(text='❌ Очистить все', callback_data='clear_all_stamp')
         )
+        builder.row(InlineKeyboardButton(text='🔲Шаблон', callback_data='sample_video'))
         return builder.as_markup()
 
 
@@ -313,6 +317,8 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Скорость перевода', callback_data='translated_speed'),
         )
         builder.row(InlineKeyboardButton(text='Нахлест', callback_data='overlap'))
+        builder.row(InlineKeyboardButton(text='🔲Шаблон', callback_data='sample_video'))
+
         return builder.as_markup()
 
 
@@ -519,6 +525,7 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Размер', callback_data='size_shadow'),
         )
         builder.row(InlineKeyboardButton(text='Максимум слов', callback_data='max_words'))
+        builder.row(InlineKeyboardButton(text='🔲Шаблон', callback_data='sample_video'))
         return builder.as_markup()
 
     @staticmethod
@@ -801,6 +808,7 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Разрешение', callback_data='resolution')
         )
         builder.adjust(4)
+        builder.row(InlineKeyboardButton(text='🔲Шаблон', callback_data='sample_video'))
         return builder.as_markup()
 
     @staticmethod
@@ -813,7 +821,7 @@ class CustomKeyboard:
             InlineKeyboardButton(text='Кроп', callback_data='timestamps')
         )
         builder.adjust(4)
-
+        builder.row(InlineKeyboardButton(text='🔲Шаблон', callback_data='sample_video'))
         return builder.as_markup()
 
 

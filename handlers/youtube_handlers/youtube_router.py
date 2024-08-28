@@ -1,10 +1,11 @@
-from aiogram import Router, F
-from aiogram.types import Message
 from db.database import db
 from utils.download_from_googledrive import create_and_upload_file
 from aiogram import Router, F
+from utils.create_download_link import upload_to_fileio
 from aiogram.types import Message
-from utils.video.download_video import download_video
+from utils.youtube_downloaders.download_video import download_video_from_youtube
+from utils.youtube_downloaders.download_audio import download_audio_from_youtube
+from utils.youtube_downloaders.download_subtitles import download_subtitles_from_youtube
 from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import FSInputFile
 from states.states import WaitingYoutube
@@ -21,79 +22,70 @@ youtube_router = Router()
 
 @youtube_router.message(F.text == '🚩 Ютуб')
 async def create_youtube_subtitles(message: Message):
-    db.connect()
     user_id = message.from_user.id
-
-    voice = db.get_voice(user_id)
-    rate = db.get_rate(user_id)
     dict_bool = {True: '✅', False: '❌'}
     buttons1 = keyboards.CustomKeyboard.create_youtube_buttons()
     buttons2 = keyboards.CustomKeyboard.inline_youtube_settings()
 
     await message.answer(f'{texts.future_request_information}', reply_markup=buttons1)
-    id_panel = await message.answer(texts.youtube_download_settings.format(dict_bool[db.get_user_settings('download_subtitles', user_id)],
-                                                                           dict_bool[db.get_user_settings('download_video', user_id)],
-                                                                           dict_bool[db.get_user_settings('download_audio', user_id)]),
+    down_sub = dict_bool[await db.get_user_setting('download_subtitles', user_id)]
+    down_vid = dict_bool[await db.get_user_setting('download_video', user_id)]
+    down_aud = dict_bool[await db.get_user_setting('download_audio', user_id)]
+    id_panel = await message.answer(texts.youtube_download_settings.format(down_sub,
+                                                                           down_vid,
+                                                                           down_aud),
                                     reply_markup=buttons2)
-    db.update_user_settings('id_youtube_panel', id_panel.message_id, user_id)
+    await db.update_user_setting('id_youtube_panel', id_panel.message_id, user_id)
 
-    db.disconnect()
 
 
 @youtube_router.message(F.text == '📥 Скачать')
 async def create_download_keyboard(message: Message, state: FSMContext):
-    db.connect()
-
     user_id = message.from_user.id
     await state.set_state(WaitingYoutube.link)
     await message.answer(texts.wait_youtube_link)
-    db.disconnect()
+
 
 
 @youtube_router.message(WaitingYoutube.link)
-async def change_color(message: Message, state: FSMContext):
-    db.connect()
+async def download_content(message: Message, state: FSMContext):
     link = message.text
     user_id = message.from_user.id
-    subtitles = db.get_user_settings('download_subtitles', user_id)
-    video = db.get_user_settings('download_video', user_id)
-    audio = db.get_user_settings('download_audio', user_id)
+    subtitles = await db.get_user_setting('download_subtitles', user_id)
+    video = await db.get_user_setting('download_video', user_id)
+    audio = await db.get_user_setting('download_audio', user_id)
     if subtitles:
-        result: bool = await bot.send_chat_action(message.from_user.id, 'typing')
-        answer = download_video_subtitles(link, _all_=True)
-        file_name = answer + '.txt'
-        document = FSInputFile("subtitles/" + file_name)
-        await bot.send_message(message.chat.id, 'Субтитры')
-        await bot.send_document(message.chat.id, document)
+        await bot.send_chat_action(message.from_user.id, 'typing')
+        subtitle_path = await download_subtitles_from_youtube(link, user_id)
+        subtitles_file = FSInputFile(subtitle_path)
+        print(subtitle_path)
+        await bot.send_document(message.chat.id, subtitles_file)
         shutil.rmtree('subtitles')
         os.makedirs('subtitles')
     if video:
-        result: bool = await bot.send_chat_action(message.from_user.id, 'typing')
-        video_title = download_video(link)
-        google_drive_link = create_and_upload_file(dir_path='video', name=video_title)
-        await bot.send_message(message.chat.id, 'Видео')
-        await bot.send_message(message.chat.id, google_drive_link)
+        await bot.send_chat_action(user_id, 'upload_video')
+        video_path = await download_video_from_youtube(link, user_id)
+        if check_size(video_path): # content > 25 mb
+            fileio_link = await upload_to_fileio(video_path)
+            await bot.send_message(user_id, fileio_link)
+        else:
+            video = FSInputFile(video_path)
+            await bot.send_video(chat_id=user_id, video=video)
         shutil.rmtree('video')
         os.makedirs('video')
     if audio:
-
-        video_title = download_video(link)
-        audio_name = split_audio(video_title)
-        audio_path = f'audio_files/{audio_name}'
-        await bot.send_message(message.chat.id, 'Аудио')
+        await bot.send_chat_action(user_id, 'upload_audio')
+        audio_path = await download_audio_from_youtube(link)
         if check_size(audio_path):
-            google_drive_link = create_and_upload_file(dir_path='audio_files', name=audio_name)
-            await bot.send_message(message.chat.id, google_drive_link)
+            fileio_link = await upload_to_fileio(audio_path)
+            await bot.send_message(user_id, fileio_link)
         else:
             audio = FSInputFile(audio_path)
-            await bot.send_audio(message.from_user.id, audio=audio)
-        shutil.rmtree('video')
-        os.makedirs('video')
+            await bot.send_audio(chat_id=user_id, audio=audio)
         shutil.rmtree('audio_files')
         os.makedirs('audio_files')
 
     await state.clear()
-    db.disconnect()
 
 
 

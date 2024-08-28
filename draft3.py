@@ -1,16 +1,26 @@
-import subprocess
+import asyncio
 
-def add_music(video_path, music, output_path='output.mp4'):
+
+async def replace_audio(video_path, audio_path, output_path):
     command = [
-        'ffmpeg', '-i', f"{video_path}", '-i', music,
-        '-filter_complex',
-        '[0:a]volume=0.6[a1];[1:a]volume=0.4[a2];[a1][a2]amix=inputs=2[out_a]',
-        '-c:v', 'copy', '-map', '0:v:0', '-map', '[out_a]', '-shortest', f"{output_path}"
+        'ffmpeg',
+        '-i', audio_path,  # Новая аудиодорожка
+        '-i', video_path,  # Оригинальное видео
+        '-shortest',       # Обрезка видео до длины аудиодорожки
+        output_path        # Путь для сохранения нового видеофайла
     ]
 
-    subprocess.run(command, check=True)
-    os.remove(title)
-    os.rename('TmpVideo/cropped.mp4', title)
+    # Запуск команды ffmpeg в асинхронном режиме
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
 
+    # Ожидание завершения процесса и получение вывода
+    stdout, stderr = await process.communicate()
 
-
+    if process.returncode == 0:
+        print(f"Video created successfully: {output_path}")
+    else:
+        print(f"Error occurred: {stderr.decode()}")

@@ -33,6 +33,7 @@ class WaitingStateVideoSettings(StatesGroup):
     subtitles = State()
     translator = State()
     timestamps = State()
+    sample = State()
     format = State()
     size = State()
     source_language = State()

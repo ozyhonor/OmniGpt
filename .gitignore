@@ -49,6 +49,11 @@ wheels/
 *.sql
 *.db
 
+draft2.py
+draft3.py
+draft4.py
+draft.py
+
 # Игнорировать файлы OS
 .DS_Store
 Thumbs.db

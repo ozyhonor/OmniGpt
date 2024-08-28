@@ -29,9 +29,6 @@ async def process_message_gpt_request(message: Message, state: FSMContext) -> No
 
 @gpt_file.message(WaitingStateGpt.file_gpt)
 async def process_file_gpt_request(message: Message, state: FSMContext, settings=None) -> None:
-    """
-
-    """
     states.states.stop_gpt = False
     markup = keyboards.CustomKeyboard.create_stop_button().as_markup()
     user_id = message.from_user.id
@@ -44,10 +41,8 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
-    db.connect()
-    model = db.get_user_settings('gpt_model', user_id)
+    model = await db.get_user_setting('gpt_model', user_id)
     chunks = split_text(text, model=model)
-    db.disconnect()
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
     answer = await file_request(chunks, message, settings)

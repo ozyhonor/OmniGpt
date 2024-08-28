@@ -13,28 +13,29 @@ youtube_settings_router = Router()
 
 @youtube_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('download_from_yt:'))
 async def process_music(callback_query: types.CallbackQuery):
-    db.connect()
     changed_setting = callback_query.data.split(':')[1]
     dict_bool = {True : '✅', False: '❌'}
     transcription = {'subtitles': 'субтитры', 'video': 'видео', 'audio': 'аудио'}
     user_id = callback_query.from_user.id
     markup = keyboards.CustomKeyboard.inline_cancel()
-    id_panel = db.get_user_settings('id_youtube_panel', user_id)
-    bool_changed_setting: bool = not(db.get_user_settings(f'download_{changed_setting}', user_id))
-    db.update_user_settings(f'download_{changed_setting}', bool_changed_setting, user_id)
+    id_panel = await db.get_user_setting('id_youtube_panel', user_id)
+    bool_changed_setting: bool = not(await db.get_user_setting(f'download_{changed_setting}', user_id))
+    await db.update_user_setting(f'download_{changed_setting}', bool_changed_setting, user_id)
     await callback_query.answer(f'Скачать {transcription[changed_setting]} {dict_bool[bool_changed_setting]}')
     markup = keyboards.CustomKeyboard.inline_youtube_settings()
-    await bot.edit_message_text(chat_id=user_id, message_id=id_panel, text=reload_settings(user_id))
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=id_panel, text=new_text_settings)
     await bot.edit_message_reply_markup(user_id, id_panel, reply_markup=markup)
-    db.disconnect()
 
 
 
-def reload_settings(user_id):
-    db.connect()
+async def reload_settings(user_id):
+    subtitles = await db.get_user_setting('download_subtitles', user_id)
+    video = await db.get_user_setting('download_video', user_id)
+    audio = await db.get_user_setting('download_audio', user_id)
     dict_bool = {True: '✅', False: '❌'}
-    new_settings = texts.youtube_download_settings.format(dict_bool[db.get_user_settings('download_subtitles', user_id)],
-                                                 dict_bool[db.get_user_settings('download_video', user_id)],
-                                                      dict_bool[db.get_user_settings('download_audio', user_id)])
-    db.disconnect()
+    new_settings = texts.youtube_download_settings.format(dict_bool[subtitles],
+                                                 dict_bool[video],
+                                                      dict_bool[audio])
+
     return new_settings

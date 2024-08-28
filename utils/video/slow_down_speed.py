@@ -2,6 +2,9 @@ import os
 import subprocess
 
 
+"""
+ffmpeg -i input.mp4 -vf "setpts=(PTS-STARTPTS)/0.5" -af atempo=0.5 output02.mp4
+"""
 def slow_down_speed(name, slow_down):
 
     slow_setpts = {0.5: 2, 0.8: 1.25, 0.625: 1.6}[slow_down]

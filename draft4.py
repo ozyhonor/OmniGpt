@@ -1,1 +1,1 @@
-print('🔤'.encode('utf-8'))
+print(2 or 1)

@@ -19,14 +19,12 @@ async def process_message_gpt_request(message: Message, state: FSMContext) -> No
     QUEUE.clear()
     await state.set_state(WaitingStateGpt.queue_files)
 
-    # Удаление предыдущего сообщения, если оно существует
     if previous_message_id:
         try:
             await bot.delete_message(user_id, previous_message_id)
         except Exception as e:
             print(e, 'in process_message_gpt_request (DELETE)')
 
-    # Отправка нового сообщения
     sent_message = await bot.send_message(user_id, '<b>Ожидается файл</b>')
     previous_message_id = sent_message.message_id
 
@@ -36,7 +34,6 @@ async def accept_file(message: Message) -> None:
     global previous_message_id
     user_id = message.from_user.id
 
-    # Удаление предыдущего сообщения, если оно существует
     if previous_message_id:
         await bot.delete_message(user_id, previous_message_id)
 

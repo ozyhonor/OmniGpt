@@ -10,7 +10,6 @@ video_router = Router()
 
 @video_router.message(F.text == '🎥 Видео')
 async def create_youtube_subtitles(message: Message):
-    db.connect()
     user_id = message.from_user.id
 
     dict_bool = {1 : '✅', 0 : '❌'}
@@ -23,5 +22,4 @@ async def create_youtube_subtitles(message: Message):
     print(id_panel)
     panel_message_id = id_panel.message_id
 
-    db.add_id_panel(user_id=user_id, id=panel_message_id)
-    db.disconnect()
+    await db.update_user_setting('id_settings_panel', panel_message_id, user_id)
