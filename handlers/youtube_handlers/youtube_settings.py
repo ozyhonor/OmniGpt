@@ -15,12 +15,12 @@ youtube_settings_router = Router()
 async def process_music(callback_query: types.CallbackQuery):
     changed_setting = callback_query.data.split(':')[1]
     dict_bool = {True : '✅', False: '❌'}
-    transcription = {'subtitles': 'субтитры', 'edit_content': 'видео', 'audio': 'аудио'}
+    transcription = {'download_subtitles': 'субтитры', 'download_video': 'видео', 'download_audio': 'аудио'}
     user_id = callback_query.from_user.id
     markup = keyboards.CustomKeyboard.inline_cancel()
     id_panel = await db.get_user_setting('id_youtube_panel', user_id)
-    bool_changed_setting: bool = not(await db.get_user_setting(f'download_{changed_setting}', user_id))
-    await db.update_user_setting(f'download_{changed_setting}', bool_changed_setting, user_id)
+    bool_changed_setting: bool = not(await db.get_user_setting(f'{changed_setting}', user_id))
+    await db.update_user_setting(f'{changed_setting}', bool_changed_setting, user_id)
     await callback_query.answer(f'Скачать {transcription[changed_setting]} {dict_bool[bool_changed_setting]}')
     markup = keyboards.CustomKeyboard.inline_youtube_settings()
     new_text_settings = await reload_settings(user_id)

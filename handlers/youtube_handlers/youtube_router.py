@@ -71,8 +71,8 @@ async def download_content(message: Message, state: FSMContext):
         else:
             video = FSInputFile(video_path)
             await bot.send_video(chat_id=user_id, video=video)
-        shutil.rmtree('edit_content')
-        os.makedirs('edit_content')
+        shutil.rmtree('video')
+        os.makedirs('video')
     if audio:
         await bot.send_chat_action(user_id, 'upload_audio')
         audio_path = await download_audio_from_youtube(link)
