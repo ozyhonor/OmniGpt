@@ -4,7 +4,13 @@ import re
 def split_text(text: str, model='gpt-3.5-turbo') -> list:
 
     if model == 'gpt-4':
-        max_chunk_size = 7000
+        max_chunk_size = 5000
+    elif model == 'gpt-4o':
+        max_chunk_size = 3000
+    elif model == 'gpt-4-turbo':
+        max_chunk_size = 3000
+    elif model == 'gpt-4o-mini':
+        max_chunk_size = 2000
     else:  # По умолчанию gpt-3.5-turbo
         max_chunk_size = 2000
 

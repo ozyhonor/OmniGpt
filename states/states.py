@@ -57,6 +57,8 @@ class WaitingStateVideoSettings(StatesGroup):
 
 
 class WaitingStateGpt(StatesGroup):
+    postsettings = State()
+    postmodel = State()
     queue_files = State()
     settings = State()
     text_gpt = State()

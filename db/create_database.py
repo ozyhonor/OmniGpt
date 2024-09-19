@@ -48,7 +48,11 @@ CREATE TABLE IF NOT EXISTS users (
     dest_lang TEXT DEFAULT 'en',
     translator_id_panel INTEGER DEFAULT 0,
     translated_color TEXT DEFAULT '255,255,255,0',
-    second_color TEXT DEFAULT '255,255,255,0'
+    second_color TEXT DEFAULT '255,255,255,0',
+    shadow_color TEXT DEFAULT '255,255,255,0',
+    postprocess_settings TEXT DEFAULT 'None',
+    postprocess_bool BOOLEAN DEFAULT 0,
+    postmodel TEXT DEFAULT 'gpt-3.5-turbo'
 )
 """)
 

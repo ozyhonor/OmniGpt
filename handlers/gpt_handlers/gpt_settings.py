@@ -9,6 +9,13 @@ from menu import keyboards, texts
 gpt_settings = Router()
 
 
+@gpt_settings.callback_query(F.data == '⚙️ Настройки+')
+async def change_gpt_postsettings(callback_query: CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    await state.set_state(WaitingStateGpt.postsettings)
+    markup = keyboards.ChatGpt.create_inline_kb_default_settings()
+    await bot.send_message(user_id, texts.write_gpt_settings, reply_markup=markup)
+
 @gpt_settings.callback_query(F.data == '⚙️ Настройки')
 async def change_gpt_settings(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
@@ -17,13 +24,22 @@ async def change_gpt_settings(callback_query: CallbackQuery, state: FSMContext) 
     await bot.send_message(user_id, texts.write_gpt_settings, reply_markup=markup)
 
 
+@gpt_settings.callback_query(F.data == '🤖 Модель+')
+async def change_gpt_postmodel(callback_query: CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    message_id = callback_query.message.message_id
+    markup = keyboards.ChatGpt.create_gpt_model_settings('post')
+    await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
+
+
 
 @gpt_settings.callback_query(lambda callback_query: callback_query.data == 'gpt_back_to_main_markup')
 async def back_from_model_menu(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     message_id = callback_query.message.message_id
     await state.clear()
-    markup = keyboards.ChatGpt.create_gpt_settings()
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
 
 
@@ -36,6 +52,34 @@ async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> 
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
 
 
+@gpt_settings.callback_query(lambda callback_query: callback_query.data.startswith('postsettings'))
+async def change_postprocess_bool(callback_query: CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    message_id = callback_query.message.message_id
+    last_postprocess = await db.get_user_setting('postprocess_bool', user_id)
+    await db.update_user_setting('postprocess_bool', not(last_postprocess), user_id)
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+
+
+@gpt_settings.callback_query(lambda callback_query: callback_query.data.startswith('gpt_model:post'))
+async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    model = callback_query.data.split(':post')[1]
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    message_id = callback_query.message.message_id
+    await db.update_user_setting('postmodel', model, user_id)
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+
+
 @gpt_settings.callback_query(lambda callback_query: callback_query.data.startswith('gpt_model:'))
 async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
@@ -43,11 +87,27 @@ async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> 
     panel_id = await db.get_user_setting('id_gpt_panel', user_id)
     message_id = callback_query.message.message_id
     await db.update_user_setting('gpt_model', model, user_id)
-    markup = keyboards.ChatGpt.create_gpt_settings()
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     new_text_settings = await reload_settings(user_id)
     await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
 
+
+@gpt_settings.message(WaitingStateGpt.postsettings)
+async def process_settings(message: Message, state: FSMContext) -> None:
+    user_id, settings = message.from_user.id, message.text
+
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
+    await db.update_user_setting('postprocess_settings', settings, user_id)
+    await message.delete()
+    await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    await state.clear()
 
 
 @gpt_settings.message(WaitingStateGpt.settings)
@@ -55,7 +115,8 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     user_id, settings = message.from_user.id, message.text
 
     panel_id = await db.get_user_setting('id_gpt_panel', user_id)
-    markup = keyboards.ChatGpt.create_gpt_settings()
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     await db.update_user_setting('gpt', settings, user_id)
     await message.delete()
     await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
@@ -78,7 +139,8 @@ async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) ->
 async def process_degree(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     panel_id = await db.get_user_setting('id_gpt_panel', user_id)
-    markup = keyboards.ChatGpt.create_gpt_settings()
+    process_bool = await db.get_user_setting('process_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     try:
         degree = float(message.text)
 
@@ -96,10 +158,17 @@ async def process_degree(message: Message, state: FSMContext) -> None:
 
 
 async def reload_settings(user_id):
+    process_settings = await db.get_user_setting('postprocess_settings', user_id)
+    postmodel = await db.get_user_setting('postmodel', user_id)
+    do_postprocess = await db.get_user_setting('postprocess_bool', user_id)
+
+    process_settings_message_info = texts.settings_request_with_postprocess.format(process_settings, postmodel)
+    process_settings_message_info = process_settings_message_info if do_postprocess else ''
+
     settings = await db.get_user_setting('gpt', user_id)
     degree = await db.get_user_setting('degree', user_id)
     gpt_model = await db.get_user_setting('gpt_model', user_id)
     new_settings = texts.settings_request.format(settings,
                                                  degree,
-                                                 gpt_model)
+                                                 gpt_model)+ process_settings_message_info
     return new_settings

@@ -6,22 +6,34 @@ import os
 class ChatGpt:
 
     @staticmethod
-    def create_gpt_model_settings():
+    def create_gpt_model_settings(postsettings = ''):
         builder = InlineKeyboardBuilder()
         builder.row(
-            InlineKeyboardButton(text='💪 gpt-3.5-turbo', callback_data='gpt_model:gpt-3.5-turbo'),
-            InlineKeyboardButton(text='🦾 gpt-4', callback_data='gpt_model:gpt-4')
-        )
-        builder.row(InlineKeyboardButton(text='◀️ Назад', callback_data='gpt_back_to_main_markup'))
+        InlineKeyboardButton(text='🏅gpt-4o', callback_data=f'gpt_model:{postsettings}gpt-4o'),
+        InlineKeyboardButton(text='🎖gpt-4-turbo', callback_data=f'gpt_model:{postsettings}gpt-4-turbo'),
+        InlineKeyboardButton(text='🥇gpt-4', callback_data=f'gpt_model:{postsettings}gpt-4'),
+        InlineKeyboardButton(text='🥈gpt-4o-mini', callback_data=f'gpt_model:{postsettings}gpt-4o-mini'),
+        InlineKeyboardButton(text='🥉gpt-3.5-turbo', callback_data=f'gpt_model:{postsettings}gpt-3.5-turbo'))
+        builder.row(InlineKeyboardButton(text='◀️ Назад', callback_data=f'gpt_back_to_main_markup'))
 
         return builder.as_markup()
 
     @staticmethod
-    def create_gpt_settings():
+    def create_gpt_settings(postprocess_bool):
+        dict_bool = {1:'✅', 0:'❌'}
         builder = InlineKeyboardBuilder()
         names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель']
         for name in names_settings_gpt:
             builder.button(text=f"{name}", callback_data=f"{name}")
+        builder.row(
+            InlineKeyboardButton(text=f'🔬Постобработка {dict_bool[postprocess_bool]}', callback_data='postsettings')
+        )
+        if postprocess_bool:
+            builder.row(
+                InlineKeyboardButton(text=f'⚙️ Настройки+', callback_data='⚙️ Настройки+'),
+                InlineKeyboardButton(text=f'🤖 Модель+', callback_data='🤖 Модель+')
+
+            )
 
         return builder.as_markup()
 

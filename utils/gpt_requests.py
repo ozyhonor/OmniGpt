@@ -2,6 +2,7 @@ from random import choice
 import requests
 import traceback
 import states.states
+import re
 from config_reader import gpt_tokens
 
 from spawnbot import bot
@@ -25,12 +26,16 @@ async def write_book():
 
 
 
-async def file_request(chunks, message, settings):
+async def chunks_request(chunks, message, settings, post_request=''):
     start_time = time()
     used_tokens = 0
     user_id = message.from_user.id
     degree = await db.get_user_setting('degree', user_id)
+
+
     model = await db.get_user_setting('gpt_model', user_id)
+    if post_request:
+        model = await db.get_user_setting('gpt_model', user_id)
 
     if settings is None:
         settings = await db.get_user_setting('gpt', user_id)
@@ -76,8 +81,8 @@ async def file_request(chunks, message, settings):
     # Завершаем процесс, обновляем прогресс и сохраняем результат
     await _update_progress(answers, chunks, message, progress_msg)
 
-    await _handle_exception(answers, message)
-    return [round(time() - start_time, 2), used_tokens, used_tokens]
+    await _handle_exception(answers, message, post_request)
+    return [round(time() - start_time, 2), answers, used_tokens]
 
 
 # Асинхронная функция для обновления прогресса
@@ -99,17 +104,22 @@ async def _handle_stop_gpt(answers, message):
         ...
 
 # Асинхронная функция для обработки исключений и сохранения результатов
-async def _handle_exception(answers, message):
+async def _handle_exception(answers, message, post = ''):
     try:
-        await _save_answers_to_file(answers, message, "OmniBot")
+        if post:
+            answers = reversed(sorted(answers, key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+',
+                                                                                                             x) and 0 <= int(
+                re.search(r'\d+', x).group()) <= 10 else float('-inf')))
+
+        await _save_answers_to_file(answers, message, "OmniBot",post)
     except:
         ...
 
 
 # Функция для сохранения ответов в файл
-async def _save_answers_to_file(answers, message, default_name):
+async def _save_answers_to_file(answers, message, default_name,post=''):
     try:
-        file_name = f"txt files/GPT{message.document.file_name.rsplit('.', 1)[0]}.txt"
+        file_name = f"txt files/{post}GPT{message.document.file_name.rsplit('.', 1)[0]}.txt"
         with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
             for answer in answers or default_name:
                 file.write(answer + "\n\n")

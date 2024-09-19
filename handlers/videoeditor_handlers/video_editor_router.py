@@ -22,7 +22,7 @@ from utils.edit_content.split_video import split_timestamps
 from utils.edit_content.add_music import add_music
 from utils.edit_content.video_editor import process_video
 from utils.download_subtitles import download_video_subtitles
-from utils.gpt_requests import file_request
+from utils.gpt_requests import chunks_request
 from utils.split_text_for_gpt import split_text
 from utils.decode_any_format import detect_file_format
 from menu import texts
