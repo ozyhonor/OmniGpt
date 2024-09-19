@@ -24,12 +24,14 @@ async def send_request_for_access(message: Message) -> None:
     else:
         reply = CustomKeyboard.create_acsess().as_markup()
         for admin_id in admins_ids:
-            if message.from_user.id in admins_ids:
-                await db.add_new_user(message.from_user.id)
+            if str(user_id) in admins_ids:
+                await db.add_new_user(user_id)
                 markup = CustomKeyboard.create_reply_main_menu()
-                await bot.send_message(chat_id=message.text, text='Вам выдали доступ!', reply_markup=markup)
+                await bot.send_message(chat_id=user_id, text='Вам выдали доступ!', reply_markup=markup)
                 return
             await bot.send_message(chat_id=admin_id, text=f'Запросили доступ! \nid:{message.from_user.id} \nname:{message.from_user.full_name}', reply_markup=reply)
+
+
 
 @premium_router.callback_query(F.data == '✅ Принять')
 async def accept_new_user(callback_query: CallbackQuery, state: FSMContext) -> None:
