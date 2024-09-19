@@ -251,7 +251,7 @@ class CustomKeyboard:
 
     @staticmethod
     def create_acsess():
-        names_gender = ['✅ ᚢᚹᛋᚺᚱᛠⰓ', '❌ ᛜᛠᛕᚳᛜᚺᛋᛠⰓ']
+        names_gender = ['✅ Принять', '❌ Отклонить']
         builder = InlineKeyboardBuilder()
         for name in names_gender:
             builder.button(text=f"{name}", callback_data=f"{name}")
