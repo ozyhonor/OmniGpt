@@ -47,7 +47,8 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     answer = await file_request(chunks, message, settings)
 
-    await message.answer(texts.water_mark_omnigpt.format(answer[0]))
+    await message.answer(texts.water_mark_omnigpt.format(answer[2]))
+
 
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'
     document = FSInputFile("txt files/GPT"+file_name)

@@ -7,7 +7,7 @@ from states.states import WaitingStateVideoSettings
 from aiogram.fsm.context import FSMContext
 from menu import texts
 from aiogram import types
-from utils.video.create_example_video import create_example_video_async
+from utils.edit_content.create_example_video import create_example_video_async
 from utils.is_color import is_hex_color
 from menu.keyboards import CustomKeyboard
 import os
@@ -410,39 +410,6 @@ async def process_font_button(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=CustomKeyboard.inline_font())
 
 
-@video_settings_router.callback_query(lambda callback_query: callback_query.data == 'upload_font')
-async def font_button(callback_query: types.CallbackQuery, state: FSMContext):
-
-    await state.clear()
-    user_id = callback_query.from_user.id
-    panel_id = await db.get_user_setting('id_settings_panel', user_id)
-    markup = CustomKeyboard.inline_cancel()
-    await bot.send_message(chat_id=user_id, text='Ожидается файл шрифта. ttf, otf, woff, woff2.', reply_markup=markup)
-    await state.set_state(WaitingStateVideoSettings.font)
-
-
-@video_settings_router.message(WaitingStateVideoSettings.font)
-async def change_font(message: Message, state: FSMContext):
-
-    user_id = message.from_user.id
-    panel_id = await db.get_user_setting('id_settings_panel', user_id)
-    result: bool = await bot.send_chat_action(message.from_user.id, 'upload_document')
-    file_id = message.document.file_id
-    file = await bot.get_file(file_id)
-    file_path = file.file_path
-    main_file_name = os.path.join('fonts', message.document.file_name)
-    file_ext = os.path.splitext(main_file_name)[1]
-
-    if file_ext.lower() in ['.ttf', '.otf', '.woff', '.woff2']:
-        font = await bot.download_file(file_path, main_file_name)
-        markup = CustomKeyboard.inline_font()
-        await bot.edit_message_reply_markup(chat_id=user_id, message_id=panel_id, reply_markup=markup)
-
-    await message.delete()
-    await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
-    await state.clear()
-
-
 @video_settings_router.callback_query(lambda callback_query: callback_query.data == 'color')
 async def color_settings(callback_query: types.CallbackQuery):
 
@@ -819,12 +786,14 @@ async def reload_settings(user_id):
     font = await db.get_user_setting('font', user_id)
     size = await db.get_user_setting('font_size', user_id)
     color = await db.get_user_setting('primary_color', user_id)
+    second_color = await db.get_user_setting('second_color', user_id)
     position = await db.get_user_setting('position', user_id)
     outline = dict_bool[await db.get_user_setting('outline', user_id)]
     outline_size = await db.get_user_setting('outline_size', user_id)
     outline_color = await db.get_user_setting('outline_color', user_id)
     shadow = dict_bool[await db.get_user_setting('background', user_id)]
     shadow_color = await db.get_user_setting('background_color', user_id)
+    translated_color = await db.get_user_setting('translated_color', user_id)
     translator = dict_bool[await db.get_user_setting('translator', user_id)]
     source_language = await db.get_user_setting('source_language', user_id)
     translated_language = await db.get_user_setting('translated_language', user_id)
@@ -845,10 +814,12 @@ async def reload_settings(user_id):
         font=font,
         size=size,
         color=color,
+        translated_color=translated_color,
         position=position,
         outline=outline,
         outline_size=outline_size,
         outline_color=outline_color,
+        second_color=second_color,
         shadow=shadow,
         shadow_color=shadow_color,
         translator=translator,

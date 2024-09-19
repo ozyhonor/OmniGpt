@@ -3,7 +3,7 @@ from moviepy.editor import concatenate_videoclips
 from random import randint
 import ffmpeg
 from utils.speech_requests import openai_audio_request
-from utils.video.create_translate import create_translate_text
+from utils.edit_content.create_translate import create_translate_text
 import subprocess
 import pysrt
 import os

@@ -1,6 +1,6 @@
 import math
-from utils.video.local_requests.get_subtitles import send_recognize_request
-from utils.video.support_scripts.convert_json_to_srt import json_to_srt
+from utils.edit_content.local_requests.get_subtitles import send_recognize_request
+from utils.edit_content.support_scripts.convert_json_to_srt import json_to_srt
 import subprocess
 from moviepy.editor import VideoFileClip
 import shutil

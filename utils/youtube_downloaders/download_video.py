@@ -92,7 +92,7 @@ async def download_video_from_youtube(url, user_id):
     await bot.edit_message_text(chat_id=user_id,
                           message_id=info_message_id,
                           text="Загрузка: 100%  ✅")
-    #for file in os.listdir('video'):
+    #for file in os.listdir('edit_content'):
     #    if video_title in file:
     #        video_title = file
     #        break

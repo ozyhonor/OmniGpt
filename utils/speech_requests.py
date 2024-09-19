@@ -29,9 +29,8 @@ async def openai_audio_request(voice, input_text, output_file, speed, model='tts
     attempts = 0
     start_time = time()
 
-    proxy = proxy_config().get('http')
-
     while attempts < max_attempts:
+        proxy = proxy_config().get('https')
         attempts += 1
         api_key = choice(gpt_tokens)
         headers = {
@@ -56,12 +55,19 @@ async def openai_audio_request(voice, input_text, output_file, speed, model='tts
                         await file.write(content)
 
                     logger.info(f"Request successful on attempt {attempts}. Output saved to {output_file}")
-                    return [output_file, round(time() - start_time, 2)]
+
+                    try:
+                        result = await response.json()
+                        tokens_used = result['usage']['total_tokens']
+                    except:
+                        tokens_used = 10
+                        logger.warning('Its not working li63')
+                    return [output_file, tokens_used, round(time() - start_time, 2)]
 
         except Exception as e:
             logger.error(f"Attempt {attempts} failed: {e}")
             if attempts >= max_attempts:
-                logger.error("Maximum number of attempts reached. Request failed.")
+                logger.error("Maximum number of attempts reached. Request failed")
 
 
 
@@ -69,7 +75,7 @@ async def openai_audio_request(voice, input_text, output_file, speed, model='tts
 async def file_request(chunks, message):
     start_time = time()
     user_id = message.from_user.id
-
+    token_coast = 10
     voice = await db.get_user_setting('synthes_voice',user_id)
     rate = await db.get_user_setting('synthes_speed',user_id)
 
@@ -86,7 +92,10 @@ async def file_request(chunks, message):
 
         for i, task in enumerate(asyncio.as_completed(tasks)):
             try:
-                answer = str((await task)[0])
+                solo_request_answer = await task
+                tokens = int(solo_request_answer[1])
+                answer = str(solo_request_answer[0])
+                token_coast += tokens
                 answers.append(answer)
 
                 if len(answers) % 10 == 0:
@@ -98,7 +107,7 @@ async def file_request(chunks, message):
                     await bot.send_chat_action(message.from_user.id, 'upload_audio')
                     await _handle_exception(answers, message)
                     await complete_audio_files(answers)
-                    return [round(time() - start_time, 2), answers]
+                    return [answers, token_coast]
 
             except CancelledError:
                 logger.warning(f"Task {i} was cancelled.")
@@ -110,12 +119,12 @@ async def file_request(chunks, message):
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         await complete_audio_files(answers[0])
-        return [round(time() - start_time, 2), answers]
+        return [answers, token_coast]
 
     await _update_progress(answers, chunks, message, msg)
     await _handle_exception(answers, message)
     await complete_audio_files(answers)
-    return [round(time() - start_time, 2), answers]
+    return [answers, token_coast]
 
 
 async def _update_progress(answers, chunks, message, msg):
@@ -133,7 +142,7 @@ async def complete_audio_files(files, input_folder="audio_files"):
     if not files:
         logger.error("No audio files generated.")
         return
-
+    files =sorted([file for file in os.listdir('audio_files') if ('.mp3' in file and not('omnibot' in file))])
     if len(files) == 1:
         # Если только один файл, переименуем его в output.mp3
         single_file = files[0]

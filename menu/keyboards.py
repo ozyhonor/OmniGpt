@@ -488,7 +488,7 @@ class CustomKeyboard:
     def inline_youtube_settings():
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text='Субтитры', callback_data='download_from_yt:subtitles'),
-                    InlineKeyboardButton(text='Видео', callback_data='download_from_yt:video'),
+                    InlineKeyboardButton(text='Видео', callback_data='download_from_yt:edit_content'),
                     InlineKeyboardButton(text='Аудио', callback_data='download_from_yt:audio'))
         return builder.as_markup()
 

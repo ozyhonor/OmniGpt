@@ -1,6 +1,6 @@
 import srt
 import asyncio
-from utils.video.create_translate import create_translate_text
+from utils.edit_content.create_translate import create_translate_text
 import os
 from setup_logger import logger
 

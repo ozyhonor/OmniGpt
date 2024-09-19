@@ -39,7 +39,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext) -> None:
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
-
+    print(text)
     chunks = split_text(text)
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
@@ -51,13 +51,14 @@ async def process_file_gpt_request(message: Message, state: FSMContext) -> None:
 
     file_size_mb = file_size_bytes / (1024 ** 2)
     if file_size_mb > 47:
-        link = upload_to_fileio('audio_files/output.mp3')
+        link = await upload_to_fileio('audio_files/output.mp3')
         await message.answer(f'Ваша ссылка на файл: {link}')
         shutil.rmtree('audio_files')
         os.makedirs('audio_files')
     else:
         audio = FSInputFile(f'audio_files/output.mp3')
-        await message.answer(texts.water_mark_omnigpt.format(answer[0]))
+        await message.answer(texts.water_mark_omnigpt.format(answer[1]))
+
         await bot.send_audio(message.from_user.id, audio=audio)
         shutil.rmtree('audio_files')
         os.makedirs('audio_files')

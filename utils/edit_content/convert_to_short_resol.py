@@ -1,5 +1,5 @@
 import subprocess
-from utils.video.get_resolution import get_video_resolution
+from utils.edit_content.get_resolution import get_video_resolution
 import os
 import shutil
 

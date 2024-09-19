@@ -8,7 +8,7 @@ import string
 
 
 
-def create_and_upload_file(dir_path='video', name='ready.mp4'):
+def create_and_upload_file(dir_path='edit_content', name='ready.mp4'):
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
     try:
@@ -51,7 +51,7 @@ def download_from_drive(url):
     # Get the file name
     file_name = file['title']
     print(file_name)
-    if file_name in os.listdir('video'):
+    if file_name in os.listdir('edit_content'):
         return file_name
-    gdown.download(url, 'video/'+file_name, quiet=False)
+    gdown.download(url, 'edit_content/'+file_name, quiet=False)
     return file_name

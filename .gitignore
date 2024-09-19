@@ -2,7 +2,6 @@
 !TmpVideo/
 !video/
 !spawnbot.py
-!requirements.txt
 !loader.py
 !config_reader.py
 !audio_files/

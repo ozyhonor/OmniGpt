@@ -4,7 +4,7 @@ import os
 from setup_logger import logger
 
 
-async def srt_to_ass(srt_file, user_id):
+async def srt_to_ass(srt_file, user_id, marginv=0):
 
     base_name = os.path.splitext(srt_file)[0]
     output_subtitles = f'{base_name}.ass'
@@ -15,6 +15,9 @@ async def srt_to_ass(srt_file, user_id):
 
     primary_color = await db.get_user_setting('primary_color', user_id)
     primary_r, primary_g, primary_b, primary_a = map(int, primary_color.split(','))
+
+    second_color = await db.get_user_setting('second_color', user_id)
+    second_r, second_g, second_b, second_a = map(int, second_color.split(','))
 
     outline_color = await db.get_user_setting('outline_color', user_id)
     outline_r, outline_g, outline_b, outline_a = map(int, outline_color.split(','))
@@ -27,16 +30,23 @@ async def srt_to_ass(srt_file, user_id):
 
 
     style = pysubs2.SSAStyle()
+    fontsize = await db.get_user_setting('font_size', user_id)
     style.fontname = await db.get_user_setting('font', user_id)
-    style.fontsize = await db.get_user_setting('font_size', user_id)
-    style.primarycolor = pysubs2.Color(primary_r, primary_g, primary_b, primary_a)
-
-    style.secondarycolor = pysubs2.Color(primary_r, primary_g, primary_b, primary_a) # ВАААУ находка!
+    if marginv != 0:
+        style.fontsize = fontsize-2
+        style.marginv = fontsize * 1.2 * 3
+        style.primarycolor = pysubs2.Color(255, 182, 155, 0)
+        style.secondarycolor = pysubs2.Color(255, 182, 155, 0)
+    else:
+        style.fontsize = fontsize
+        style.primarycolor = pysubs2.Color(primary_r, primary_g, primary_b, primary_a)
+        style.secondarycolor = pysubs2.Color(second_r, second_g, second_b, second_a)
 
     style.outlinecolor = pysubs2.Color(outline_r, outline_g, outline_b, outline_a)
     style.backcolor = pysubs2.Color(background_r, background_g, background_b, background_a)
 
     style.outline = await db.get_user_setting('outline_size', user_id)
+    translated = await db.get_user_setting('translator', user_id)
 
     style.alignment = pysubs2.Alignment.BOTTOM_CENTER # настроить позицию
 

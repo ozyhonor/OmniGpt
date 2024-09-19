@@ -12,8 +12,8 @@ from states.states import WaitingYoutube
 from spawnbot import bot
 from menu import keyboards, texts
 import os
-from utils.video.check_size import check_size
-from utils.video.split_audio import split_audio
+from utils.edit_content.check_size import check_size
+from utils.edit_content.split_audio import split_audio
 from utils.download_subtitles import download_video_subtitles
 
 import shutil
@@ -71,8 +71,8 @@ async def download_content(message: Message, state: FSMContext):
         else:
             video = FSInputFile(video_path)
             await bot.send_video(chat_id=user_id, video=video)
-        shutil.rmtree('video')
-        os.makedirs('video')
+        shutil.rmtree('edit_content')
+        os.makedirs('edit_content')
     if audio:
         await bot.send_chat_action(user_id, 'upload_audio')
         audio_path = await download_audio_from_youtube(link)

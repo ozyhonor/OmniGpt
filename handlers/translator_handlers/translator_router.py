@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from utils.video.create_translate import create_translate_text
+from utils.edit_content.create_translate import create_translate_text
 from db.database import db
 from aiogram import Router, F
 from menu.texts import languages

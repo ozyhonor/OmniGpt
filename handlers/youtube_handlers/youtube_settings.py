@@ -15,7 +15,7 @@ youtube_settings_router = Router()
 async def process_music(callback_query: types.CallbackQuery):
     changed_setting = callback_query.data.split(':')[1]
     dict_bool = {True : '✅', False: '❌'}
-    transcription = {'subtitles': 'субтитры', 'video': 'видео', 'audio': 'аудио'}
+    transcription = {'subtitles': 'субтитры', 'edit_content': 'видео', 'audio': 'аудио'}
     user_id = callback_query.from_user.id
     markup = keyboards.CustomKeyboard.inline_cancel()
     id_panel = await db.get_user_setting('id_youtube_panel', user_id)

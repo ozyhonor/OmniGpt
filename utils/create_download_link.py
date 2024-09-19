@@ -1,10 +1,11 @@
 from config_reader import proxy_config
 import aiohttp
+import asyncio
 
 
 async def upload_to_fileio(file_path):
     url = "https://file.io/"
-    proxy = proxy_config()  # Ваша функция для получения прокси, если используется
+    proxy = proxy_config().get('http')  # Ваша функция для получения прокси, если используется
 
     # Открываем файл асинхронно
     async with aiohttp.ClientSession() as session:
@@ -17,3 +18,5 @@ async def upload_to_fileio(file_path):
                     return file_info['link']
                 else:
                     return None
+
+

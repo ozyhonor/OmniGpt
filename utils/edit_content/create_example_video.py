@@ -23,7 +23,7 @@ async def create_example_video_async(user_id):
     outline = db.get_outline(user_id)
     shadow = db.get_shadow(user_id)
 
-    example_image = os.path.realpath('example/video.mp4')
+    example_image = os.path.realpath('example/edit_content.mp4')
     subtitle_file = 'example/example.srt'
     output_file = 'example/example.mp4'
     font_file = 'fonts/' + font

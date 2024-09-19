@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS users (
     overlap INTEGER DEFAULT 0,
     gpt_model TEXT DEFAULT 'gpt-3.5-turbo',
     dest_lang TEXT DEFAULT 'en',
-    translator_id_panel INTEGER DEFAULT 0
+    translator_id_panel INTEGER DEFAULT 0,
+    translated_color TEXT DEFAULT '255,255,255,0',
+    second_color TEXT DEFAULT '255,255,255,0'
 )
 """)
 
