@@ -11,6 +11,7 @@ gpt_router = Router()
 @gpt_router.message(F.text == '🤖 ChatGpt')
 async def create_gpt_request_for_request(message: Message):
 
+    f_text = "🤖 ChatGpt"
     user_id = message.from_user.id
     setting = await db.get_user_setting('gpt', user_id)
     degree = await db.get_user_setting('degree', user_id)
@@ -20,7 +21,7 @@ async def create_gpt_request_for_request(message: Message):
     process_bool = await db.get_user_setting('postprocess_bool', user_id)
     inline_reply = ChatGpt.create_gpt_settings(process_bool)
 
-    await message.answer(f'{texts.future_request_information}', reply_markup=markup_reply)
+    await message.answer(f'{texts.future_request_information.format(f_text)}', reply_markup=markup_reply)
     process_settings = await db.get_user_setting('postprocess_settings', user_id)
     postmodel = await db.get_user_setting('postmodel', user_id)
 

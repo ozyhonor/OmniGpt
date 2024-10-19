@@ -27,7 +27,7 @@ async def create_youtube_subtitles(message: Message):
     buttons1 = keyboards.CustomKeyboard.create_youtube_buttons()
     buttons2 = keyboards.CustomKeyboard.inline_youtube_settings()
 
-    await message.answer(f'{texts.future_request_information}', reply_markup=buttons1)
+    await message.answer(f'{texts.future_request_information.format('🚩 Ютуб')}', reply_markup=buttons1)
     down_sub = dict_bool[await db.get_user_setting('download_subtitles', user_id)]
     down_vid = dict_bool[await db.get_user_setting('download_video', user_id)]
     down_aud = dict_bool[await db.get_user_setting('download_audio', user_id)]

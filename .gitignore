@@ -53,6 +53,8 @@ draft3.py
 draft4.py
 draft.py
 
+cookies.txt
+
 # Игнорировать файлы OS
 .DS_Store
 Thumbs.db

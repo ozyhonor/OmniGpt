@@ -1,3 +1,5 @@
+import random
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 import os
@@ -8,12 +10,12 @@ class ChatGpt:
     @staticmethod
     def create_gpt_model_settings(postsettings = ''):
         builder = InlineKeyboardBuilder()
-        builder.row(
-        InlineKeyboardButton(text='🏅gpt-4o', callback_data=f'gpt_model:{postsettings}gpt-4o'),
+        builder.row(InlineKeyboardButton(text='🏅gpt-4o', callback_data=f'gpt_model:{postsettings}gpt-4o'),
         InlineKeyboardButton(text='🎖gpt-4-turbo', callback_data=f'gpt_model:{postsettings}gpt-4-turbo'),
-        InlineKeyboardButton(text='🥇gpt-4', callback_data=f'gpt_model:{postsettings}gpt-4'),
         InlineKeyboardButton(text='🥈gpt-4o-mini', callback_data=f'gpt_model:{postsettings}gpt-4o-mini'),
-        InlineKeyboardButton(text='🥉gpt-3.5-turbo', callback_data=f'gpt_model:{postsettings}gpt-3.5-turbo'))
+        InlineKeyboardButton(text='🥉gpt-3.5-turbo', callback_data=f'gpt_model:{postsettings}gpt-3.5-turbo'),
+        InlineKeyboardButton(text='🏆gpt-4-omni', callback_data=f'gpt_model:gpt-4o-real  time-preview'),
+        InlineKeyboardButton(text='🥇gpt-4', callback_data=f'gpt_model:gpt-4'))
         builder.row(InlineKeyboardButton(text='◀️ Назад', callback_data=f'gpt_back_to_main_markup'))
 
         return builder.as_markup()
@@ -52,6 +54,19 @@ class TranslatorButtons():
 class CustomKeyboard:
     def __init__(self):
         reply_markup = None
+
+    @staticmethod
+    def create_vision_models(postsettings = ''):
+        builder = InlineKeyboardBuilder()
+        builder.row(
+        InlineKeyboardButton(text='🏅gpt-4o', callback_data=f'vision_model:{postsettings}gpt-4o'),
+        InlineKeyboardButton(text='🎖gpt-4-turbo', callback_data=f'vision_model:{postsettings}gpt-4-turbo'),
+        InlineKeyboardButton(text='🥇gpt-4', callback_data=f'vision_model:{postsettings}gpt-4'),
+        InlineKeyboardButton(text='🥈gpt-4o-mini', callback_data=f'vision_model:{postsettings}gpt-4o-mini'),
+        InlineKeyboardButton(text='🥉gpt-3.5-turbo', callback_data=f'vision_model:{postsettings}gpt-3.5-turbo'))
+        builder.row(InlineKeyboardButton(text='◀️ Назад', callback_data=f'vision_back_to_main_markup'))
+
+        return builder.as_markup()
 
 
     @staticmethod
@@ -160,6 +175,20 @@ class CustomKeyboard:
         return builder
 
     @staticmethod
+    def create_vision_buttons_down():
+
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [
+                    KeyboardButton(text='◀️ Назад'),
+                    KeyboardButton(text=f'📷 Фото'),
+                    KeyboardButton(text='📕 Файл')
+                ]
+                ],  resize_keyboard=True)
+
+        return keyboard
+
+    @staticmethod
     def create_translator_buttons():
 
         keyboard = ReplyKeyboardMarkup(
@@ -259,15 +288,25 @@ class CustomKeyboard:
 
 
     @staticmethod
+    def create_vision_button():
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='⚙️ Настройки', callback_data='vision_prompt'),
+            InlineKeyboardButton(text='🤖 Модель', callback_data='vision_model'))
+        return builder.as_markup()
+
+
+    @staticmethod
     def create_reply_main_menu():
 
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
                 [
                     KeyboardButton(text='🤖 ChatGpt'),
-                    KeyboardButton(text='🎧 Озвучка'),
+                    KeyboardButton(text='🎙 Озвучка'),
                     KeyboardButton(text='🚩 Ютуб'),
-                    KeyboardButton(text='🔄 Перевод'),
+                    KeyboardButton(text='🔄 Переводчик'),
+                    KeyboardButton(text='👁‍🗨 Зрение'),
                     KeyboardButton(text='🎥 Видео')
                 ]
                 ],  resize_keyboard=True)

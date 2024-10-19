@@ -55,6 +55,11 @@ class WaitingStateVideoSettings(StatesGroup):
     id_settings_panel = State(),
     volume_music = State()
 
+class WaitingStateVision(StatesGroup):
+    vision_photo = State()
+    vision_file = State()
+    vision_settings = State()
+    vision_model = State()
 
 class WaitingStateGpt(StatesGroup):
     postsettings = State()

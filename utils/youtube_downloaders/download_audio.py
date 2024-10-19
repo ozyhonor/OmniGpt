@@ -9,6 +9,8 @@ async def download_audio_from_youtube(url):
     proxy = proxy_config()['http']
     command_audio = [
         'yt-dlp',
+        "--cookies",
+        "cookies.txt",
         '-f', 'bestaudio',  # Загрузка аудио в лучшем качестве
         '--extract-audio',  # Извлечение аудио
         '--audio-format', 'mp3',  # Конвертация в формат mp3

@@ -39,16 +39,17 @@ async def get_dest_and_flag(user_id):
     return dest_lang, flag
 
 
-@translator_router.message(F.text == '🔄 Перевод')
+@translator_router.message(F.text == '🔄 Переводчик')
 async def create_gpt_request_for_request(message: Message):
     user_id = message.from_user.id
+    f_text = '🔄 Переводчик'
 
     dest_lang, flag = await get_dest_and_flag(user_id)
 
     markup_inline = keyboards.CustomKeyboard.inline_translated_languages_for_translator()
     markup_reply = keyboards.CustomKeyboard.create_translator_buttons()
 
-    await message.answer(f'{texts.future_request_information}', reply_markup=markup_reply)
+    await message.answer(f'{texts.future_request_information.format(f_text)}', reply_markup=markup_reply)
     text = texts.translator_text_panel.format(dest_lang, flag, '1')
     id_translator_panel = await message.answer(text, reply_markup=markup_inline)
     id_translator_panel = id_translator_panel.message_id
@@ -79,16 +80,36 @@ async def process_overlap_value_button(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=keyboards.CustomKeyboard.inline_translated_languages_for_translator())
 
 
+@translator_router.message(F.text == '📧Текст')
+async def translate_message_request(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    user_id = message.from_user.id
+    await state.set_state(WaitingStateTranslator.text_translate)
+    await bot.send_message(user_id, '<b>Ожидается текстовый запрос</b>')
+
+
 @translator_router.message(F.text == '🗃 Файл')
-async def process_message_gpt_request(message: Message, state: FSMContext) -> None:
+async def translate_file_request(message: Message, state: FSMContext) -> None:
     await state.clear()
     user_id = message.from_user.id
     await state.set_state(WaitingStateTranslator.file_translate)
     await bot.send_message(user_id, '<b>Ожидается файловый запрос</b>')
 
 
+@translator_router.message(WaitingStateTranslator.text_translate)
+async def go_to_translate_message(message: Message, state: FSMContext) -> None:
+    result: bool = await bot.send_chat_action(message.from_user.id, 'typing')
+    text = message.text
+    dest = await db.get_user_setting('dest_lang', message.from_user.id)
+    answer = await create_translate_text(text, dest=dest)
+    await message.answer(texts.water_mark_omnigpt.format(answer[0]))
+    await bot.send_message(message.chat.id, answer)
+    await state.clear()
+
+
+
 @translator_router.message(WaitingStateTranslator.file_translate)
-async def process_file_gpt_request(message: Message, state: FSMContext, settings=None) -> None:
+async def go_translate_request(message: Message, state: FSMContext, settings=None) -> None:
     result: bool = await bot.send_chat_action(message.from_user.id, 'upload_document')
     file_id = message.document.file_id
     file = await bot.get_file(file_id)

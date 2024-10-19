@@ -104,7 +104,7 @@ default_settings_gpt = """
 """
 
 future_request_information = """
-➖➖➖<b>OmniGpt</b>➖➖➖
+➖➖➖<b>{}</b>➖➖➖
 """
 
 synthesis_information = """
@@ -190,6 +190,10 @@ languages = [
 
 settings_request = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🌡 <i>{1}</i></blockquote>\n<blockquote><i>🤖 {2}</i></blockquote>
+"""
+
+vision_request = """
+<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote><i>🤖 {1}</i></blockquote>
 """
 
 settings_request_with_postprocess = """

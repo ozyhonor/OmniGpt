@@ -47,6 +47,7 @@ async def chunks_request(chunks, message, settings, post_request=''):
     progress_msg = await message.answer(f'<b>Процесс работы:</b> <i>0/{len(chunks)}</i>')
     last_update_time = time()
     try:
+        await bot.send_chat_action(user_id, 'typing')
         # Создаем задачи и сохраняем их в словаре с индексами
         tasks = {
             i: asyncio.create_task(solo_request(chunk, message, degree, settings, model))

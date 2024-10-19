@@ -5,6 +5,7 @@ from handlers.gpt_handlers.gpt_text import gpt_text
 from handlers.gpt_handlers.gpt_file_queue import gpt_file_queue
 from handlers.gpt_handlers.gpt_settings import gpt_settings
 from handlers.gpt_handlers.gpt_file import gpt_file
+from handlers.vision.vision_photo import vision_photo_router
 from handlers.text_to_speech_gpt.speech_router import speech_router
 from handlers.text_to_speech_gpt.speech_settings import speech_settings_router
 from handlers.text_to_speech_gpt.speech_text import speech_text_router
@@ -16,7 +17,9 @@ from handlers.videoeditor_handlers.video_router import video_router
 from handlers.videoeditor_handlers.video_settings_router import video_settings_router
 from handlers.videoeditor_handlers.video_editor_router import video_editor_router
 from handlers.youtube_handlers.youtube_settings import youtube_settings_router
+from handlers.vision.vision_router import vision_router
 from handlers.translator_handlers.translator_router import translator_router
+from handlers.vision.vision_settings import vision_settings
 import sys
 import logging
 import asyncio
@@ -56,7 +59,10 @@ async def main() -> None:
         video_settings_router,
         video_editor_router,
         youtube_settings_router,
-        translator_router
+        translator_router,
+        vision_router,
+        vision_photo_router,
+        vision_settings
     )
     await dp.start_polling(bot, on_startup=on_startup)
 

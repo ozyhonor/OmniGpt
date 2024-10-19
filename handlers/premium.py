@@ -23,13 +23,12 @@ async def send_request_for_access(message: Message) -> None:
         return
     else:
         reply = CustomKeyboard.create_acsess().as_markup()
-        for admin_id in admins_ids:
-            if str(user_id) in admins_ids:
-                await db.add_new_user(user_id)
-                markup = CustomKeyboard.create_reply_main_menu()
-                await bot.send_message(chat_id=user_id, text='Вам выдали доступ!', reply_markup=markup)
-                return
-            await bot.send_message(chat_id=admin_id, text=f'Запросили доступ! \nid:{message.from_user.id} \nname:{message.from_user.full_name}', reply_markup=reply)
+        if str(user_id) in admins_ids:
+            await db.add_new_user(user_id)
+            markup = CustomKeyboard.create_reply_main_menu()
+            await bot.send_message(chat_id=user_id, text='Вам выдали доступ!', reply_markup=markup)
+            return
+        await bot.send_message(chat_id=admins_ids, text=f'Запросили доступ! \nid:{message.from_user.id} \nname:{message.from_user.full_name}', reply_markup=reply)
 
 
 

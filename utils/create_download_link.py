@@ -8,7 +8,7 @@ async def upload_to_fileio(file_path):
     proxy = proxy_config().get('http')  # Ваша функция для получения прокси, если используется
 
     # Открываем файл асинхронно
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(trust_env=True) as session:
         with open(file_path, 'rb') as f:
             files = {'file': f}
             # Отправка POST-запроса

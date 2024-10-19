@@ -24,6 +24,7 @@ gpt_file = Router()
 async def process_message_gpt_request(message: Message, state: FSMContext) -> None:
     await state.clear()
     user_id = message.from_user.id
+    if not(await db.is_user_exist(user_id)): return
     await state.set_state(WaitingStateGpt.file_gpt)
     await bot.send_message(user_id, '<b>Ожидается файловый запрос</b>')
 
@@ -44,6 +45,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     model = await db.get_user_setting('gpt_model', user_id)
+    result: bool = await bot.send_chat_action(user_id, 'typing')
     chunks = split_text(text, model=model)
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 

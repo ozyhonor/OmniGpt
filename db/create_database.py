@@ -52,8 +52,10 @@ CREATE TABLE IF NOT EXISTS users (
     shadow_color TEXT DEFAULT '255,255,255,0',
     postprocess_settings TEXT DEFAULT 'None',
     postprocess_bool BOOLEAN DEFAULT 0,
-    postmodel TEXT DEFAULT 'gpt-3.5-turbo'
-)
+    postmodel TEXT DEFAULT 'gpt-3.5-turbo',
+    vision_prompt TEXT DEFAULT '',
+    vision_model TEXT DEFAULT 'gpt-4o',
+    id_vision_panel INTEGER DEFAULT 0)
 """)
 
 conn.commit()

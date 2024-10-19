@@ -11,6 +11,8 @@ async def download_subtitles_from_youtube(url, user_id):
     proxy = proxy_config().get('http')
     command_subtitles = [
         'yt-dlp',
+        "--cookies",
+        "cookies.txt",
         '--write-sub',
         '--write-auto-subs',
         '--convert-subs', 'srt',

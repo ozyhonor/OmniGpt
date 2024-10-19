@@ -4,9 +4,13 @@ from aiogram.types import Message
 from db.database import db
 from menu.keyboards import CustomKeyboard
 from menu.texts import video_settings_message
+import asyncio
+
+
 
 
 start_router = Router()
+
 
 
 @start_router.message(Command("start"))

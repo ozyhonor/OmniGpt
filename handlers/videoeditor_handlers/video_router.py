@@ -16,7 +16,7 @@ async def create_youtube_subtitles(message: Message):
 
     buttons1 = keyboards.CustomKeyboard.create_inline_video_settings_buttons()
     buttons2 = keyboards.CustomKeyboard.create_video_main()
-    await message.answer(f'{texts.future_request_information}', reply_markup=buttons2)
+    await message.answer(f'{texts.future_request_information.format('🎥 Видео')}', reply_markup=buttons2)
     settings = await reload_settings(user_id)
     id_panel = await message.answer(settings, reply_markup=buttons1)
     print(id_panel)

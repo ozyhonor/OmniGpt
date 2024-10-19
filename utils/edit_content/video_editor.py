@@ -384,10 +384,11 @@ async def process_video(video_path, user_id, message):
                 else: video_path_by_ten_minutes.append(video)
 
                 video_to_process = video_path_by_ten_minutes[number_video_part]
-
+                smart_subtitles = await db.get_user_setting('smart_sub', user_id)
                 audio_path = await extract_audio(video_to_process)
                 subtitle_path = await send_recognize_request(audio_path, auto_subtitles)
-                subtitle_path = await json_to_srt(subtitle_path, overlap)
+                if not smart_subtitles:
+                    subtitle_path = await json_to_srt(subtitle_path, overlap)
 
                 if subtitles:
                     subtitle_path_to_add_sub = await srt_to_ass(subtitle_path, user_id)
