@@ -58,12 +58,6 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 
-    if postgpt_settings != 'None':
-        postprocess = await chunks_request(answer[1], message, settings, post_request='post')
-        await message.answer(texts.water_mark_omnigpt.format(postprocess[2]))
-
-        document = FSInputFile("txt files/postGPT" + file_name)
-        await bot.send_document(message.chat.id, document)
 
     os.remove("txt files/sorted GPT" + file_name)
     os.remove(f'txt files/GPT{file_name}')
