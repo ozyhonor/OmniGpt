@@ -30,7 +30,9 @@ async def translate_text(text, target_language="ru"):
         async with session.post(URL, json=body, headers=headers, ssl=ssl_context) as response:
             if response.status == 200:
                 response_data = await response.json()
+                print(response_data)
                 return response_data['translations'][0]['text']
+
             else:
                 logger.error(f"Error {response.status}: {await response.text()}")
                 return None
@@ -38,7 +40,7 @@ async def translate_text(text, target_language="ru"):
 # Функция для перевода субтитров
 async def translate_subtitles(input_srt_path):
     base_name, ext = os.path.splitext(input_srt_path)
-    output_srt_path = f"{base_name}_translated{ext}"
+    output_srt_path = input_srt_path.replace('.srt', '_translated_ready.srt')
 
     logger.info(f"Translating subtitles for file: {input_srt_path}")
 
@@ -143,6 +145,3 @@ def apply_translations(chunk, translated_text):
 
     return new_subtitles
 
-# Запуск процесса перевода субтитров
-if __name__ == "__main__":
-    asyncio.run(translate_subtitles('Harris_vs_Trump_and_What_s_at_Stake_for_the_World_TED_Expla.srt'))

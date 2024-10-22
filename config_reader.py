@@ -35,3 +35,5 @@ po = config.get('youtube_support_account', 'po')
 
 telegram_token = config.get('telegram', 'key')
 admins_ids = config.get('telegram', 'admins_ids')
+
+yandex_api_key = config.get('yandex', 'api')

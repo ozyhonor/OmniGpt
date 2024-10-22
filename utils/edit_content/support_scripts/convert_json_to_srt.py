@@ -23,6 +23,9 @@ async def json_to_srt(filepath: str, overlap: int = 0):
         chunk_word_count = 0
 
         for i, word_data in enumerate(words):
+            if i > len(text)-1:
+                break
+            print(i)
             word = text[i]
             start_time = word_data["start"]
             end_time = word_data["end"]

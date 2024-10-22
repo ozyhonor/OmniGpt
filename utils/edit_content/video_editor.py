@@ -4,21 +4,17 @@ import aiofiles
 import srt
 from setup_logger import logger
 import os
+from utils.edit_content.local_requests.yandex_translate import translate_subtitles
 from utils.edit_content.local_requests.get_subtitles import send_recognize_request
 from utils.edit_content.support_scripts.convert_json_to_srt import json_to_srt
 from utils.edit_content.support_scripts.convert_srt_to_ass import srt_to_ass
 from utils.edit_content.support_scripts.get_subtitles_content import get_subtitles_content
 from utils.speech_requests import openai_audio_request
-from utils.gpt_requests import solo_request
-from utils.edit_content.create_translate import create_translate_text
-from utils.edit_content.local_requests.get_translated_subtitles import translate_subtitles
 import re
-from menu.texts import ideal_video_settings
 from spawnbot import bot
 import time
 import math
 
-import threading
 from proglog import ProgressBarLogger
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
@@ -66,8 +62,10 @@ async def monitor_progress(logger_, u_id, m_id):
         await asyncio.sleep(3)
 
 
-async def process_videos(video_files, logger_):
+async def process_videos(video_files, logger_, video_with_subtitles):
     # Создание списка клипов
+    new_name = video_with_subtitles.replace('.mp4', 'omni.mp4')
+
     clips = [VideoFileClip(video) for video in video_files]
 
     # Объединение клипов
@@ -76,11 +74,12 @@ async def process_videos(video_files, logger_):
     # Сохранение финального видео с использованием кастомного логгера
     await asyncio.to_thread(
         final_clip.write_videofile,
-        'final_video.mp4',
+        new_name,
         codec='libx264',
         audio_codec='aac',
         logger=logger_
     )
+    return new_name
 
 async def add_fade_in(input_file, fade_duration=0.3):
     temp_file = input_file.replace('.mp4', 'fade_in_.mp4')
@@ -161,18 +160,19 @@ async def replace_audio(video_path, audio_path):
 
 
 async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id: int):
-    output_video = input_video.replace('.mp4', '_with_subs.mp4')
+    output_video = input_video.replace('.mp4', '_ws.mp4')
     info_message = await bot.send_message(user_id, 'Cубтитры: 0')
 
     info_message_text = info_message.text
     info_message_id = info_message.message_id
+
     command = [
         'ffmpeg',
         '-y',
-        '-i', input_video,
-        '-vf', f'subtitles={input_subtitles}',
+        '-i', f'{input_video}',
+        '-vf', f"subtitles='{input_subtitles}'",
         '-progress', 'pipe:1',
-        output_video
+        f'{output_video}'
     ]
 
 
@@ -205,13 +205,13 @@ async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id
 
 
     await process.wait()
-
+    stdout, stderr = await process.communicate()
     if process.returncode == 0:
         logger.info("Video successfully processed!")
         await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: 100% ✅')
     else:
         logger.error(f"Process ended with return code {process.returncode}. Please check the output above for errors.")
-
+        logger.error(f"Error output: {stderr.decode('utf-8')}")
     return output_video
 
 
@@ -361,6 +361,8 @@ async def process_video(video_path, user_id, message):
     overlap:int = await db.get_user_setting('overlap', user_id)
     max_duration_seconds = 600 # time to send to recognize
 
+    new_video_path = None
+
     videos_path_by_timecode = []
     for part in timestamps.split(' '):
         if part != '0':
@@ -399,30 +401,26 @@ async def process_video(video_path, user_id, message):
 
 
                 if translator:
-                    stroke = await get_sub_text(subtitle_path)
-                    chunks = '\n'.join(stroke)
+                    translated_subtitles = await translate_subtitles(subtitle_path)
+                    subtitle_path_to_add_sub_translated = await srt_to_ass(translated_subtitles, user_id, marginv=30)
+                    video_with_subtitles = await add_subtitles_to_video(video_with_subtitles, subtitle_path_to_add_sub_translated,
+                                                                        user_id)
 
-                    translated_text = await create_translate_text(chunks)
-
-                    translated_subtitles = await replace_srt_lines_async(subtitle_path, translated_text.split('\n'))
-                    subtitle_path_to_add_sub_translated = await srt_to_ass(translated_subtitles, user_id, marginv=35)
-                    if subtitles:
-                        video_with_subtitles = await add_subtitles_to_video(video_with_subtitles, subtitle_path_to_add_sub_translated,
-                                                                            user_id)
-                        print(video_with_subtitles)
                     all_chunks = await create_all_chunks(video_with_subtitles, translated_subtitles, user_id)
 
                     message_info = await bot.send_message(user_id, 'Склейка клипов')
                     message_info_id = message_info.message_id
                     logger_ = MyBarLogger()
                     monitoring_task = asyncio.create_task(monitor_progress(logger_, user_id, message_info_id))
-                    await process_videos(all_chunks, logger_)
+                    new_video_path = await process_videos(all_chunks, logger_, video_with_subtitles)
                     monitoring_task.cancel()
                     try:
                         await bot.edit_message_text('Склейка 100% ✅', chat_id=user_id, message_id=message_info_id)
                         await monitoring_task
                     except asyncio.CancelledError:
                         pass
+    return new_video_path
+
 
 
 

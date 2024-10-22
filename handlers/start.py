@@ -12,6 +12,14 @@ import asyncio
 start_router = Router()
 
 
+def restricted(func):
+    @wraps(func)
+    async def wrapped(message: types.Message, *args, **kwargs):
+        if message.from_user.id not in ALLOWED_USERS:
+            await message.reply("У вас нет доступа к этой команде.")
+            return
+        return await func(message, *args, **kwargs)
+    return wrapped
 
 @start_router.message(Command("start"))
 async def command_start_handler(message: Message) -> None:

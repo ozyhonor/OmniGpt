@@ -4,6 +4,7 @@ from  db.database import db
 from aiogram.types import Message
 from states.states import WaitingStateDoVideo
 from aiogram.fsm.context import FSMContext
+import re
 from utils.edit_content.split_video_audio import split_video_and_get_subtitles
 from menu.keyboards import CustomKeyboard
 from utils.create_download_link import upload_to_fileio
@@ -53,72 +54,26 @@ async def process_video_handler(message: Message, state: FSMContext):
     #Скачать
     await message.answer('Скачиваю видео...')
     video_path = await download_video_from_youtube(url_video, user_id)
+    sanitized_video_path = re.sub(r'[^\w\-/\\\.]', '_', video_path)
+    if video_path != sanitized_video_path:
+        os.rename(video_path, sanitized_video_path)
+        video_path = sanitized_video_path
 
     #Обработать
     await message.answer('Обрабатываю видео')
-    await process_video(video_path, user_id, message)
+    new_video_path = await process_video(video_path, user_id, message)
 
-    trusted_fragments = []
-    settings = db.get_all_user_settings(user_id)
-    markup = CustomKeyboard.inline_shadow_color()
-    time_crop = db.get_timestamps(user_id)
-    print(time_crop)
-    smart = db.get_smart_sub(user_id)
-    if db.get_original_speed(user_id) != 1:
-        slow_down_speed('edit_content/'+video_path, slow_down=db.get_original_speed(user_id))
+    if check_size(new_video_path):
+        link = await upload_to_fileio(new_video_path)
+        await bot.send_message(chat_id=user_id, text=f'Видео скачено!\n{link}')
+    else:
+        video = FSInputFile(new_video_path)
+        await bot.send_video(chat_id=user_id, video=video)
 
-    print(video_path)
-    for i,timestamp in enumerate(time_crop.split(' ')):
-        if time_crop != '0':
-            splited_timestamps = split_timestamps(timestamp.split('-'), 'edit_content/'+video_path)
-        else:splited_timestamps = False
-        split_video_and_get_subtitles(smart, splited_timestamps or 'edit_content/'+video_path, 'TmpVideo',16, settings['max_words'], overlap=settings['overlap'])
-        files = ([i for i in os.listdir('TmpVideo') if i.endswith('.mp4') and '_' in i])
-        files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
-        ready_files = []
-        for file in files:
-            if trusted_fragments!=[]:
-                await message.answer(trusted_fragments[i]['name'] + trusted_fragments[i]['tags'])
-            else:
-                await message.answer('Обработка видео...')
-            ready_files.append(VideoEditor(
-                settings=settings,
-                subtitles=f'TmpVideo/{file.replace('.mp4','.srt')}',
-                video_title=f'TmpVideo/{file}',
-                user_id=user_id
-            ).edit_video())
-        if len(files) == 1:
-            source_path = "TmpVideo/piece_0/ready.mp4"
-            target_path = "edit_content"
-            new_name = "omni_{title}"
-            shutil.move(source_path, target_path)
-            moved_file = os.path.join(target_path, "ready.mp4")
-            os.rename(moved_file, os.path.join(target_path, new_name.format(title=video_path)))
-        else:
-            combine_video_chunks(ready_files, video_path)
-        db.connect()
-        if db.get_resolution(user_id) != 'original':
-            change_resolution_video(title=f'edit_content/omni_{video_path}')
-        if db.get_user_settings('music', user_id) != 'None':
-            music = db.get_user_settings('music', user_id)
-            music_volume = db.get_user_settings('volume_music', user_id)
-            add_music(
-                f'omni_{video_path}',
-                'edit_content',
-                f'music/{music}',
-                music_volume
-            )
-
-        if check_size(f'edit_content/omni_{video_path}'):
-            link = await upload_to_fileio(f'edit_content/omni_{video_path}')
-            await bot.send_message(chat_id=user_id, text=f'Видео скачено!\n{link}')
-        else:
-            video = FSInputFile(f'edit_content/omni_{video_path}')
-            await bot.send_video(chat_id=user_id, video=video)
-
-        os.remove(f'edit_content/omni_{video_path}')
+    os.remove(new_video_path)
 
     await state.clear()
+    clear_directory('video')
     clear_directory('TmpVideo')
     clear_directory('edit_content')
 
