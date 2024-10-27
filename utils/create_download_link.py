@@ -12,7 +12,7 @@ async def upload_to_fileio(file_path):
         with open(file_path, 'rb') as f:
             files = {'file': f}
             # Отправка POST-запроса
-            async with session.post(url, data=files, proxy=proxy) as response:
+            async with session.post(url, data=files, proxy=proxy, ssl=False) as response:
                 if response.status == 200:
                     file_info = await response.json()
                     return file_info['link']

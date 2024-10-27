@@ -15,7 +15,7 @@ async def send_recognize_request(file, smart=False):
         format = '.srt'
         data = {
             'model': 'whisper-1',
-            'response_format': 'srt'
+            'response_format': 'vtt'
         }
     else:
         format = '.json'

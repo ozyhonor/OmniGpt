@@ -20,7 +20,7 @@ def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_mi
 
         shutil.copyfile(video_path, output_dir + '/piece_0.mp4')
         shutil.copyfile(audio_path, output_dir + '/piece_0.mp3')
-        send_recognize_request( output_dir + '/piece_0.mp3', smart=smart)
+        send_recognize_request(output_dir + '/piece_0.mp3', smart=smart)
         json_file = output_dir + '/piece_0.json'
         srt_file = output_dir + '/piece_0.srt'
         json_to_srt(smart, json_file, srt_file, words_per_chunk,overlap=overlap)

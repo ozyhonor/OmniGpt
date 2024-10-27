@@ -401,7 +401,7 @@ async def process_video(video_path, user_id, message):
 
 
                 if translator:
-                    translated_subtitles = await translate_subtitles(subtitle_path)
+                    translated_subtitles = subtitle_path.replace('.srt', '_translated.srt')
                     subtitle_path_to_add_sub_translated = await srt_to_ass(translated_subtitles, user_id, marginv=30)
                     video_with_subtitles = await add_subtitles_to_video(video_with_subtitles, subtitle_path_to_add_sub_translated,
                                                                         user_id)
