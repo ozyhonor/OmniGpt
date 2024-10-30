@@ -175,8 +175,9 @@ async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id
         f'{output_video}'
     ]
 
-
+    # Логируем и выводим команду в консоль
     logger.info(f"Running command: {' '.join(command)}")
+    print(f"Running command: {' '.join(command)}")
 
     process = await asyncio.create_subprocess_exec(
         *command,
@@ -190,28 +191,37 @@ async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id
         output = await process.stdout.readline()
         if process.returncode is not None and output == b'':
             break
-
         if output:
             output = output.decode().strip()
-            frame_match = re.search(r'frame=\s*(\d+)', output)
+            # Логируем и выводим каждый вывод `ffmpeg` в консоль
+            logger.info(output)
+            print(output)
 
+            frame_match = re.search(r'frame=\s*(\d+)', output)
             frame = frame_match.group(1) if frame_match else 'N/A'
             current_time = time.time()
 
             if (current_time - last_time >= 4) and (info_message_text != f'Cубтитры: {frame}'):
-
-                await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: {frame}')
+                try:
+                    await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: {frame}')
+                except:
+                    ...
                 last_time = current_time
-
 
     await process.wait()
     stdout, stderr = await process.communicate()
+
+    # Логируем и выводим завершение процесса
     if process.returncode == 0:
         logger.info("Video successfully processed!")
+        print("Video successfully processed!")
         await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: 100% ✅')
     else:
-        logger.error(f"Process ended with return code {process.returncode}. Please check the output above for errors.")
+        error_message = f"Process ended with return code {process.returncode}. Please check the output above for errors."
+        logger.error(error_message)
+        print(error_message)
         logger.error(f"Error output: {stderr.decode('utf-8')}")
+        print(f"Error output: {stderr.decode('utf-8')}")
     return output_video
 
 
@@ -246,6 +256,10 @@ async def get_video_duration(input_video: str) -> float:
     except Exception as e:
         logger.error(f'Unexpected error occurred: {e}')
 
+def time_to_float(time_str):
+    time_str = str(time_str).replace(",", ".")
+    hours, minutes, seconds = time_str.split(":")
+    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
 
 async def create_all_chunks(video_path, subtitles_path, user_id):
     voice = await db.get_user_setting('synthes_voice', user_id)
@@ -262,22 +276,25 @@ async def create_all_chunks(video_path, subtitles_path, user_id):
         except Exception as e:
             logger.error(e)
         start, end, text = chunk.start, chunk.end, chunk.content
-        video_fragment = await trim_by_timecode(video_path, start, end)
-        base_name, ext = os.path.splitext(video_fragment)
-        audio_path = f"{base_name}_translated.mp3"
-        translated_audio_fragment = await openai_audio_request(voice, text, audio_path, speed, model)
-        translated_audio_fragment_path = translated_audio_fragment[0]
-        print(translated_audio_fragment_path)
-        changed_audio_video_fragment = await replace_audio(video_fragment, translated_audio_fragment_path)
-        print(changed_audio_video_fragment)
-        do_slow_down = await db.get_user_setting('original_speed', user_id)
-        if do_slow_down != 1:
-            await slow_down_speed(video_fragment, do_slow_down)
-        do_fade_in = 1 #await db.get_user_setting('fade_in', user_id)
-        if do_fade_in != 0:
-            await add_fade_in(changed_audio_video_fragment)
-        video_chunks.append(changed_audio_video_fragment)
-        video_chunks.append(video_fragment)
+        print('start =', start, 'end=', end)
+        print(time_to_float(end) - time_to_float(start))
+        if (time_to_float(end) - time_to_float(start)) >= 1:
+            video_fragment = await trim_by_timecode(video_path, start, end)
+            base_name, ext = os.path.splitext(video_fragment)
+            audio_path = f"{base_name}_translated.mp3"
+            translated_audio_fragment = await openai_audio_request(voice, text, audio_path, speed, model)
+            translated_audio_fragment_path = translated_audio_fragment[0]
+            print(translated_audio_fragment_path)
+            changed_audio_video_fragment = await replace_audio(video_fragment, translated_audio_fragment_path)
+            print(changed_audio_video_fragment)
+            do_slow_down = await db.get_user_setting('original_speed', user_id)
+            if do_slow_down != 1:
+                await slow_down_speed(video_fragment, do_slow_down)
+            do_fade_in = 1 #await db.get_user_setting('fade_in', user_id)
+            if do_fade_in != 0:
+                await add_fade_in(changed_audio_video_fragment)
+            video_chunks.append(changed_audio_video_fragment)
+            video_chunks.append(video_fragment)
 
     print(video_chunks)
     try:

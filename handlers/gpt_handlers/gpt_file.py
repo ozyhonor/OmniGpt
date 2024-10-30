@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 import states.states
 import re
+from utils.decode_any_format import TYPE_TXT_FILE
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import FSInputFile
@@ -29,6 +30,13 @@ async def process_message_gpt_request(message: Message, state: FSMContext) -> No
     await bot.send_message(user_id, '<b>Ожидается файловый запрос</b>')
 
 
+def get_first_score(text):
+    # Поиск первого числа (может быть с плавающей точкой)
+    match = re.search(r"\d+(\.\d+)?", text)
+    # Если число найдено, вернем его как float, иначе 0
+    return float(match.group()) if match else 0
+
+
 @gpt_file.message(WaitingStateGpt.file_gpt)
 async def process_file_gpt_request(message: Message, state: FSMContext, settings=None) -> None:
     states.states.stop_gpt = False
@@ -37,7 +45,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     result: bool = await bot.send_chat_action(user_id, 'upload_document')
     file_id = message.document.file_id
     file = await bot.get_file(file_id)
-    postgpt_settings = await db.get_user_setting('postprocess_settings', user_id)
+    postprocess_bool = await db.get_user_setting('postprocess_bool', user_id)
     print(file)
     file_path = file.file_path
     main_file_name = ['txt files/', message.document.file_name]
@@ -58,6 +66,16 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 
+    print(postprocess_bool)
+    if postprocess_bool:
+        sorted_texts = sorted(answer[1], key=get_first_score, reverse=True)
+        file_name = f"txt files/sortedGPT"+file_name
+        with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
+            for answer in sorted_texts or 'omni':
+                file.write(answer + "\n\n")
+
+        document2 = FSInputFile(file_name)
+        await bot.send_document(message.chat.id, document2)
 
     os.remove("txt files/sorted GPT" + file_name)
     os.remove(f'txt files/GPT{file_name}')

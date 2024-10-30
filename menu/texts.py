@@ -196,10 +196,6 @@ vision_request = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote><i>🤖 {1}</i></blockquote>
 """
 
-settings_request_with_postprocess = """
-<b>Постобработка (2-ой файл)</b>:<pre>{0}</pre>
-<blockquote>🤖 {1}</blockquote>
-"""
 
 
 water_mark_omnigpt = """

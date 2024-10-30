@@ -1,148 +1,34 @@
-import srt
-import asyncio
-import aiohttp
-import ssl
-import os
-import datetime
-from config_reader import yandex_api_key
-from setup_logger import logger
-import aiofiles
+def time_to_float(time_str):
+    # Заменяем запятую на точку, чтобы обработать оба формата
+    time_str = time_str.replace(",", ".")
+    # Разделяем на часы, минуты и секунды
+    hours, minutes, seconds = time_str.split(":")
+    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
 
-# Функция для перевода текста с использованием API Yandex
-async def translate_text(text, target_language="ru"):
-    URL = "https://translate.api.cloud.yandex.net/translate/v2/translate"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Api-Key {yandex_api_key}"
-    }
-    body = {
-        "targetLanguageCode": target_language,
-        "texts": [text]
-    }
+# Примеры
+start = "0:00:00"
+end1 = "0:00:03.440000"
+end2 = "00:00:24,159"
 
-    # Установка SSL контекста (проверка SSL отключена)
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+# Переводим в float
+start_seconds = time_to_float(start)
+end_seconds1 = time_to_float(end1)
+end_seconds2 = time_to_float(end2)
 
-    # Отправка запроса на перевод
-    async with aiohttp.ClientSession() as session:
-        async with session.post(URL, json=body, headers=headers, ssl=ssl_context) as response:
-            if response.status == 200:
-                response_data = await response.json()
-                return response_data['translations'][0]['text']
-            else:
-                logger.error(f"Error {response.status}: {await response.text()}")
-                return None
+# Сравнения
+print("Сравнение end1 и start:")
+if end_seconds1 > start_seconds:
+    print("end1 больше start")
+else:
+    print("start больше или равно end1")
 
-# Функция для перевода субтитров
-async def translate_subtitles(input_srt_path):
-    base_name, ext = os.path.splitext(input_srt_path)
-    output_srt_path = f"{base_name}_translated{ext}"
+print("\nСравнение end2 и start:")
+if end_seconds2 > start_seconds:
+    print("end2 больше start")
+else:
+    print("start больше или равно end2")
 
-    logger.info(f"Translating subtitles for file: {input_srt_path}")
-
-    # Чтение исходного файла с субтитрами
-    async with aiofiles.open(input_srt_path, 'r', encoding='utf-8') as file:
-        srt_content = await file.read()
-
-    # Парсинг субтитров
-    subtitles = list(srt.parse(srt_content))
-
-    chunk = []
-    chunk_text = ""
-    max_chunk_size = 5000  # Максимальный размер текста для перевода
-    new_subtitles = []
-
-    # Процесс разделения и перевода блоков субтитров
-    for subtitle in subtitles:
-        subtitle_block = f"{subtitle.index}\n{subtitle.start} --> {subtitle.end}\n{subtitle.content}\n\n"
-        if len(chunk_text) + len(subtitle_block) <= max_chunk_size:
-            chunk.append(subtitle)
-            chunk_text += subtitle_block
-        else:
-            # Переводим накопленный блок субтитров
-            translated_chunk = await translate_chunk(chunk_text)
-            new_subtitles.extend(apply_translations(chunk, translated_chunk))
-            chunk = [subtitle]  # Начинаем новый блок
-            chunk_text = subtitle_block
-
-    # Перевод последнего блока
-    if chunk:
-        translated_chunk = await translate_chunk(chunk_text)
-        new_subtitles.extend(apply_translations(chunk, translated_chunk))
-
-    # Создаем новый SRT файл с переведенными субтитрами
-    new_srt_content = srt.compose(new_subtitles)
-    async with aiofiles.open(output_srt_path, 'w', encoding='utf-8') as output_file:
-        await output_file.write(new_srt_content)
-
-    logger.info(f"Translated subtitles saved to {output_srt_path}")
-    return output_srt_path
-
-# Функция перевода текста блоками
-async def translate_chunk(chunk_text):
-    logger.info(f"Translating chunk of size {len(chunk_text)} characters")
-    translated_text = await translate_text(chunk_text)
-    if translated_text is None:
-        logger.error(f"Translation failed for chunk: {chunk_text[:100]}...")
-    return translated_text
-
-# Функция конвертации строки времени в timedelta
-def convert_to_timedelta(time_str):
-    hours, minutes, seconds = time_str.split(':')
-    seconds_parts = seconds.replace(',', '.').split('.')
-
-    seconds = int(seconds_parts[0])
-    milliseconds = int(seconds_parts[1]) if len(seconds_parts > 1) else 0
-
-    # Преобразование в timedelta с миллисекундами
-    return datetime.timedelta(
-        hours=int(hours),
-        minutes=int(minutes),
-        seconds=seconds,
-        milliseconds=milliseconds
-    )
-
-# Функция для применения переведенного текста к исходным субтитрам
-def apply_translations(chunk, translated_text):
-    translated_blocks = translated_text.strip().split("\n\n")
-    new_subtitles = []
-
-    for i, subtitle in enumerate(chunk):
-        # Проверка наличия соответствующего переведенного блока
-        if i < len(translated_blocks):
-            translated_content = translated_blocks[i].strip()
-            lines = translated_content.split('\n')
-
-            # Извлечение индекса субтитра
-            try:
-                index = subtitle.index
-            except ValueError:
-                logger.error(f"Invalid subtitle index at block {i}. Skipping.")
-                continue
-
-            # Используем исходные таймкоды
-            start_time = subtitle.start
-            end_time = subtitle.end
-
-            # Объединение содержимого переведенного текста
-            content = ' '.join(line.strip() for line in lines[2:]).strip()
-
-            # Создание нового субтитра
-            new_subtitle = srt.Subtitle(
-                index=index,
-                start=start_time,
-                end=end_time,
-                content=content
-            )
-
-            new_subtitles.append(new_subtitle)
-        else:
-            logger.warning(f"No translation available for subtitle {i + 1}.")
-
-    return new_subtitles
-
-# Запуск процесса перевода субтитров
-if __name__ == "__main__":
-    asyncio.run(translate_subtitles('Harris_vs_Trump_and_What_s_at_Stake_for_the_World_TED_Expla.srt'))
+# Вывод значений
+print(f"\nНачальное время: {start_seconds} сек")
+print(f"Конечное время end1: {end_seconds1} сек")
+print(f"Конечное время end2: {end_seconds2} сек")

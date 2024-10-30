@@ -28,14 +28,8 @@ class ChatGpt:
         for name in names_settings_gpt:
             builder.button(text=f"{name}", callback_data=f"{name}")
         builder.row(
-            InlineKeyboardButton(text=f'🔬Постобработка {dict_bool[postprocess_bool]}', callback_data='postsettings')
+            InlineKeyboardButton(text=f'🔬Сортировка {dict_bool[postprocess_bool]}', callback_data='postsettings')
         )
-        if postprocess_bool:
-            builder.row(
-                InlineKeyboardButton(text=f'⚙️ Настройки+', callback_data='⚙️ Настройки+'),
-                InlineKeyboardButton(text=f'🤖 Модель+', callback_data='🤖 Модель+')
-
-            )
 
         return builder.as_markup()
 

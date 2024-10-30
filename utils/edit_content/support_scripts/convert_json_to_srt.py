@@ -15,9 +15,6 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False)
         data = json.loads(content)
         words = data.get("words", [])
         text = re.split(r'\s+|[-]',data.get("text"))
-        print(len(words), len(text))
-        for _ in range(len(text)):
-            print(words[_], text[_])
         chunks = []
         translated_chunk = []
         current_chunk = []
@@ -46,6 +43,7 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False)
 
             # Проверка на завершение чанка по условиям
             if (re.search(r'[,.!?]', word) and chunk_word_count >= 3) or chunk_word_count == 16:
+
                 chunks.append({
                     "start": chunk_start_time,
                     "end": chunk_end_time + overlap,
@@ -54,7 +52,7 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False)
                 translated_chunk_text = await create_translate_text(' '.join(current_chunk_translated))
                 translated_chunk.append({
                     "start": chunk_start_time,
-                    "end": chunk_end_time + overlap,
+                    "end": chunk_end_time,
                     "text": translated_chunk_text
                 })
                 # Сброс текущего чанка
@@ -73,7 +71,7 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False)
             translated_chunk_text = await create_translate_text(' '.join(current_chunk_translated))
             translated_chunk.append({
                 "start": chunk_start_time,
-                "end": chunk_end_time + overlap,
+                "end": chunk_end_time,
                 "text": translated_chunk_text
             })
             print(chunk_end_time + overlap, 'its ovelap')

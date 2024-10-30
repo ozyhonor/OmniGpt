@@ -26,9 +26,7 @@ async def create_gpt_request_for_request(message: Message):
     postmodel = await db.get_user_setting('postmodel', user_id)
 
 
-    process_settings_message_info = texts.settings_request_with_postprocess.format(process_settings, postmodel)
-    process_settings_message_info = process_settings_message_info if process_bool else ''
-    id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree, model) + process_settings_message_info, reply_markup=inline_reply)
+    id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree, model), reply_markup=inline_reply)
     id_gpt_panel = id_gpt_panel.message_id
     await db.update_user_setting('id_gpt_panel', id_gpt_panel, user_id)
 

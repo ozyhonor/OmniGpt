@@ -15,14 +15,15 @@ async def send_recognize_request(file, smart=False):
         format = '.srt'
         data = {
             'model': 'whisper-1',
-            'response_format': 'vtt'
+            'response_format': 'srt'
         }
     else:
         format = '.json'
         data = {
             'model': 'whisper-1',
             'response_format': 'verbose_json',
-            'timestamp_granularities[]': 'word'
+            'timestamp_granularities[]': 'word',
+            'language': 'en'
         }
 
     api_key = choice(gpt_tokens)

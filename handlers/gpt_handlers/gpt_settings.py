@@ -158,17 +158,11 @@ async def process_degree(message: Message, state: FSMContext) -> None:
 
 
 async def reload_settings(user_id):
-    process_settings = await db.get_user_setting('postprocess_settings', user_id)
-    postmodel = await db.get_user_setting('postmodel', user_id)
-    do_postprocess = await db.get_user_setting('postprocess_bool', user_id)
-
-    process_settings_message_info = texts.settings_request_with_postprocess.format(process_settings, postmodel)
-    process_settings_message_info = process_settings_message_info if do_postprocess else ''
 
     settings = await db.get_user_setting('gpt', user_id)
     degree = await db.get_user_setting('degree', user_id)
     gpt_model = await db.get_user_setting('gpt_model', user_id)
     new_settings = texts.settings_request.format(settings,
                                                  degree,
-                                                 gpt_model)+ process_settings_message_info
+                                                 gpt_model)
     return new_settings
