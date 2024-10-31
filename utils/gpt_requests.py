@@ -162,6 +162,8 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
 
         except Exception as e:
             logger.error(f"Exception occurred: {e}")
+            logger.error("Exception occurred", exc_info=True)
+            logger.error(f"Result gpt ans: {result}")
             return None, '', None
 
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
@@ -171,7 +173,7 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
                 print(answer)
                 return time_taken, answer, tokens_used
             logger.warning(f"Retrying... ({attempt}/{max_retries})")
-            logger.error("Exception occurred", exc_info=True)
+
 
     logger.error("Max retries reached. Request failed.")
     return None, '', None
