@@ -26,7 +26,7 @@ async def write_book():
 
 
 
-async def chunks_request(chunks, message, settings, post_request=''):
+async def chunks_request(chunks, message, settings):
     start_time = time()
     used_tokens = 0
     user_id = message.from_user.id
@@ -34,9 +34,6 @@ async def chunks_request(chunks, message, settings, post_request=''):
 
 
     model = await db.get_user_setting('gpt_model', user_id)
-    if post_request:
-        model = await db.get_user_setting('gpt_model', user_id)
-
     if settings is None:
         settings = await db.get_user_setting('gpt', user_id)
 
@@ -76,13 +73,12 @@ async def chunks_request(chunks, message, settings, post_request=''):
                     return [round(time() - start_time, 2), answers, used_tokens]
 
     except Exception as e:
-        print(f"Ошибка: {e}")
-        return [round(time() - start_time, 2), used_tokens, used_tokens]
+        print(f"Ошибка: {traceback.format_exc()}")
 
     # Завершаем процесс, обновляем прогресс и сохраняем результат
     await _update_progress(answers, chunks, message, progress_msg)
 
-    await _handle_exception(answers, message, post_request)
+    await _handle_exception(answers, message)
     return [round(time() - start_time, 2), answers, used_tokens]
 
 
@@ -105,22 +101,21 @@ async def _handle_stop_gpt(answers, message):
         ...
 
 # Асинхронная функция для обработки исключений и сохранения результатов
-async def _handle_exception(answers, message, post = ''):
+async def _handle_exception(answers, message):
     try:
-        if post:
-            answers = reversed(sorted(answers, key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+',
+        answers = reversed(sorted(answers, key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+',
                                                                                                              x) and 0 <= int(
-                re.search(r'\d+', x).group()) <= 10 else float('-inf')))
+            re.search(r'\d+', x).group()) <= 10 else float('-inf')))
 
-        await _save_answers_to_file(answers, message, "OmniBot",post)
+        await _save_answers_to_file(answers, message, "OmniBot")
     except:
         ...
 
 
 # Функция для сохранения ответов в файл
-async def _save_answers_to_file(answers, message, default_name,post=''):
+async def _save_answers_to_file(answers, message, default_name):
     try:
-        file_name = f"txt files/{post}GPT{message.document.file_name.rsplit('.', 1)[0]}.txt"
+        file_name = f"txt files/GPT{message.document.file_name.rsplit('.', 1)[0]}.txt"
         with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
             for answer in answers or default_name:
                 file.write(answer + "\n\n")
@@ -162,9 +157,9 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
 
         except Exception as e:
             logger.error(f"Exception occurred: {e}")
-            logger.error("Exception occurred", exc_info=True)
+            logger.error(f"{traceback.format_exc()}")
             logger.error(f"Result gpt ans: {result}")
-            return None, '', None
+            return 0, '', 0
 
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
         for attempt in range(1, max_retries + 1):
