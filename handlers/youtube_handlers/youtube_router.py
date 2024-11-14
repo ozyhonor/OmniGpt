@@ -60,8 +60,9 @@ async def create_download_keyboard(message: Message, state: FSMContext):
 async def download_content(message: Message, state: FSMContext):
     link = message.text
     user_id = message.from_user.id
+    target_lang = await db.get_user_setting('download_language_subtitles', user_id)
     await bot.send_chat_action(message.from_user.id, 'typing')
-    subtitle_path = await download_subtitles_from_playlist(link, user_id)
+    subtitle_path = await download_subtitles_from_playlist(link, user_id, language=target_lang)
     if check_size(subtitle_path):  # content > 25 mb
         fileio_link = await upload_to_fileio(subtitle_path)
         await bot.send_message(user_id, fileio_link)
