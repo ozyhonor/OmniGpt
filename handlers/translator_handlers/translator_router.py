@@ -119,6 +119,7 @@ async def go_translate_request(message: Message, state: FSMContext, settings=Non
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'
+    print(text)
     chunks = split_text(text)
     dest = await db.get_user_setting('dest_lang', message.from_user.id)
     new_ = []

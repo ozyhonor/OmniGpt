@@ -21,11 +21,14 @@ rhere is a stair and then it goes up again
 
 
 youtube_download_settings = ('<b>Скачать с Youtube:</b>'
-                             '<blockquote><b>Субтитры  txt:  </b>{0}</blockquote>'
-                             '<blockquote><b>Видео  mp4:  </b>{1}</blockquote>'
-                             '<blockquote><b>Аудио  mp3:  </b>{2}</blockquote>')
+                             '<blockquote><b>Субтитры  txt:  </b>{0}</blockquote>\n'
+                             '<blockquote><b>Видео  mp4:  </b>{1}</blockquote>\n'
+                             '<blockquote><b>Аудио  mp3:  </b>{2}</blockquote>\n'
+                             '<blockquote><b>Язык субтитров:  </b>{3}</blockquote>')
 
 wait_youtube_link = '<b>Ожидается ссылка на ютуб контент</b>'
+wait_youtube_playlist_link = '<b>Ожидается ссылка на ютуб плейлист</b>'
+
 
 video_settings_message = (
 '''

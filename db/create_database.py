@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS users (
     postmodel TEXT DEFAULT 'gpt-3.5-turbo',
     vision_prompt TEXT DEFAULT '',
     vision_model TEXT DEFAULT 'gpt-4o',
+    download_language_subtitles TEXT DEFAULT 'ru',
     id_vision_panel INTEGER DEFAULT 0)
 """)
 

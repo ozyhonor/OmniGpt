@@ -6,6 +6,7 @@ from aiogram.types import Message
 from utils.youtube_downloaders.download_video import download_video_from_youtube
 from utils.youtube_downloaders.download_audio import download_audio_from_youtube
 from utils.youtube_downloaders.download_subtitles import download_subtitles_from_youtube
+from utils.youtube_downloaders.download_subtitles_from_playlist import download_subtitles_from_playlist
 from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import FSInputFile
 from states.states import WaitingYoutube
@@ -31,9 +32,11 @@ async def create_youtube_subtitles(message: Message):
     down_sub = dict_bool[await db.get_user_setting('download_subtitles', user_id)]
     down_vid = dict_bool[await db.get_user_setting('download_video', user_id)]
     down_aud = dict_bool[await db.get_user_setting('download_audio', user_id)]
+    down_lang = await db.get_user_setting('download_language_subtitles', user_id)
     id_panel = await message.answer(texts.youtube_download_settings.format(down_sub,
                                                                            down_vid,
-                                                                           down_aud),
+                                                                           down_aud,
+                                                                           down_lang),
                                     reply_markup=buttons2)
     await db.update_user_setting('id_youtube_panel', id_panel.message_id, user_id)
 
@@ -45,6 +48,28 @@ async def create_download_keyboard(message: Message, state: FSMContext):
     await state.set_state(WaitingYoutube.link)
     await message.answer(texts.wait_youtube_link)
 
+
+@youtube_router.message(F.text == '💽 Плейлист')
+async def create_download_keyboard(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    await state.set_state(WaitingYoutube.playlist)
+    await message.answer(texts.wait_youtube_playlist_link)
+
+
+@youtube_router.message(WaitingYoutube.playlist)
+async def download_content(message: Message, state: FSMContext):
+    link = message.text
+    user_id = message.from_user.id
+    await bot.send_chat_action(message.from_user.id, 'typing')
+    subtitle_path = await download_subtitles_from_playlist(link, user_id)
+    if check_size(subtitle_path):  # content > 25 mb
+        fileio_link = await upload_to_fileio(subtitle_path)
+        await bot.send_message(user_id, fileio_link)
+    else:
+        combined_sub = FSInputFile(subtitle_path)
+        await bot.send_document(chat_id=user_id, document=combined_sub)
+    shutil.rmtree('subtitles')
+    os.makedirs('subtitles')
 
 
 @youtube_router.message(WaitingYoutube.link)

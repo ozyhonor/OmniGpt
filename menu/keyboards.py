@@ -3,6 +3,7 @@ import random
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 import os
+from menu.texts import languages
 
 
 class ChatGpt:
@@ -64,68 +65,39 @@ class CustomKeyboard:
 
 
     @staticmethod
-    def inline_translated_languages_for_translator(page=0):
+    def inline_translated_languages_for_download_subtitles():
         builder = InlineKeyboardBuilder()
         languages = [
-            {'code': 'af', 'flag': '🇿🇦', 'name': 'Afrikaans'},
-            {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
-            {'code': 'hy', 'flag': '🇦🇲', 'name': 'Armenian'},
-            {'code': 'az', 'flag': '🇦🇿', 'name': 'Azerbaijani'},
-            {'code': 'be', 'flag': '🇧🇾', 'name': 'Belarusian'},
-            {'code': 'bs', 'flag': '🇧🇦', 'name': 'Bosnian'},
-            {'code': 'bg', 'flag': '🇧🇬', 'name': 'Bulgarian'},
-            {'code': 'ca', 'flag': '🇪🇸', 'name': 'Catalan'},
-            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
-            {'code': 'hr', 'flag': '🇭🇷', 'name': 'Croatian'},
-            {'code': 'cs', 'flag': '🇨🇿', 'name': 'Czech'},
-            {'code': 'da', 'flag': '🇩🇰', 'name': 'Danish'},
-            {'code': 'nl', 'flag': '🇳🇱', 'name': 'Dutch'},
             {'code': 'en', 'flag': '🇬🇧', 'name': 'English'},
-            {'code': 'et', 'flag': '🇪🇪', 'name': 'Estonian'},
-            {'code': 'fi', 'flag': '🇫🇮', 'name': 'Finnish'},
-            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
-            {'code': 'gl', 'flag': '🇪🇸', 'name': 'Galician'},
-            {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
-            {'code': 'el', 'flag': '🇬🇷', 'name': 'Greek'},
-            {'code': 'he', 'flag': '🇮🇱', 'name': 'Hebrew'},
-            {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
-            {'code': 'hu', 'flag': '🇭🇺', 'name': 'Hungarian'},
-            {'code': 'is', 'flag': '🇮🇸', 'name': 'Icelandic'},
-            {'code': 'id', 'flag': '🇮🇩', 'name': 'Indonesian'},
-            {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
-            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
-            {'code': 'kn', 'flag': '🇮🇳', 'name': 'Kannada'},
-            {'code': 'kk', 'flag': '🇰🇿', 'name': 'Kazakh'},
-            {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
-            {'code': 'lv', 'flag': '🇱🇻', 'name': 'Latvian'},
-            {'code': 'lt', 'flag': '🇱🇹', 'name': 'Lithuanian'},
-            {'code': 'mk', 'flag': '🇲🇰', 'name': 'Macedonian'},
-            {'code': 'ms', 'flag': '🇲🇾', 'name': 'Malay'},
-            {'code': 'mr', 'flag': '🇮🇳', 'name': 'Marathi'},
-            {'code': 'mi', 'flag': '🇳🇿', 'name': 'Maori'},
-            {'code': 'ne', 'flag': '🇳🇵', 'name': 'Nepali'},
-            {'code': 'no', 'flag': '🇳🇴', 'name': 'Norwegian'},
-            {'code': 'fa', 'flag': '🇮🇷', 'name': 'Persian'},
-            {'code': 'pl', 'flag': '🇵🇱', 'name': 'Polish'},
-            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
-            {'code': 'ro', 'flag': '🇷🇴', 'name': 'Romanian'},
-            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
-            {'code': 'sr', 'flag': '🇷🇸', 'name': 'Serbian'},
-            {'code': 'sk', 'flag': '🇸🇰', 'name': 'Slovak'},
-            {'code': 'sl', 'flag': '🇸🇮', 'name': 'Slovenian'},
             {'code': 'es', 'flag': '🇪🇸', 'name': 'Spanish'},
-            {'code': 'sw', 'flag': '🇰🇪', 'name': 'Swahili'},
-            {'code': 'sv', 'flag': '🇸🇪', 'name': 'Swedish'},
-            {'code': 'tl', 'flag': '🇵🇭', 'name': 'Tagalog'},
-            {'code': 'ta', 'flag': '🇮🇳', 'name': 'Tamil'},
-            {'code': 'th', 'flag': '🇹🇭', 'name': 'Thai'},
-            {'code': 'tr', 'flag': '🇹🇷', 'name': 'Turkish'},
-            {'code': 'uk', 'flag': '🇺🇦', 'name': 'Ukrainian'},
-            {'code': 'ur', 'flag': '🇵🇰', 'name': 'Urdu'},
-            {'code': 'vi', 'flag': '🇻🇳', 'name': 'Vietnamese'},
-            {'code': 'cy', 'flag': '🏴', 'name': 'Welsh'},
+            {'code': 'fr', 'flag': '🇫🇷', 'name': 'French'},
+            {'code': 'ru', 'flag': '🇷🇺', 'name': 'Russian'},
+            {'code': 'zh-cn', 'flag': '🇨🇳', 'name': 'Chinese (Simplified)'},
+            {'code': 'ar', 'flag': '🇸🇦', 'name': 'Arabic'},
+            {'code': 'pt', 'flag': '🇵🇹', 'name': 'Portuguese'},
+            {'code': 'de', 'flag': '🇩🇪', 'name': 'German'},
+            {'code': 'ja', 'flag': '🇯🇵', 'name': 'Japanese'},
+            {'code': 'hi', 'flag': '🇮🇳', 'name': 'Hindi'},
+            {'code': 'it', 'flag': '🇮🇹', 'name': 'Italian'},
+            {'code': 'ko', 'flag': '🇰🇷', 'name': 'Korean'},
         ]
+        for i in range(0, len(languages), 6):
+            row = languages[i:i + 6]
+            buttons_row = [
+                InlineKeyboardButton(text=language['flag'] + ' ' + language["code"],
+                                     callback_data=f'download_subtitles_language:{language["code"]}') for
+                language in row
+            ]
+            builder.row(*buttons_row)
+        builder.row(
+            InlineKeyboardButton(text='🔙 Назад', callback_data='back_language_youtube')
+        )
+        return builder.as_markup()
 
+
+    @staticmethod
+    def inline_translated_languages_for_translator(page=0):
+        builder = InlineKeyboardBuilder()
         # Разбиваем на страницы
         languages_per_page = 12
         start = page * languages_per_page
@@ -210,8 +182,8 @@ class CustomKeyboard:
             keyboard=[
                 [
                     KeyboardButton(text='◀️ Назад'),
-                    KeyboardButton(text='📥 Скачать')
-                    #KeyboardButton(text='💽 Плейлист')
+                    KeyboardButton(text='📥 Скачать'),
+                    KeyboardButton(text='💽 Плейлист')
                 ]
                 ],  resize_keyboard=True)
 
@@ -422,7 +394,7 @@ class CustomKeyboard:
         for i in range(0, len(languages), 6):
             row = languages[i:i + 6]
             buttons_row = [
-                InlineKeyboardButton(text=language['flag'] + ' ' + language['name'],
+                InlineKeyboardButton(text=language['flag'] + ' ' + language['code'],
                                      callback_data=f'translated_language:{language["code"]}') for
                 language in row
             ]
@@ -535,6 +507,7 @@ class CustomKeyboard:
         builder.row(InlineKeyboardButton(text='Субтитры', callback_data='download_from_yt:download_subtitles'),
                     InlineKeyboardButton(text='Видео', callback_data='download_from_yt:download_video'),
                     InlineKeyboardButton(text='Аудио', callback_data='download_from_yt:download_audio'))
+        builder.row(InlineKeyboardButton(text='Язык субтитров', callback_data='download_subtitles_language'))
         return builder.as_markup()
 
 
