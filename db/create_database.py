@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
     download_audio BOOLEAN DEFAULT 0,
     id_youtube_panel INTEGER DEFAULT 0,
     music TEXT DEFAULT 'None',
-    volume_music INT CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
+    volume_music INTEGER CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
     interesting_moment BOOLEAN DEFAULT 0,
     video_title TEXT DEFAULT '',
     overlap INTEGER DEFAULT 0,
@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
     vision_prompt TEXT DEFAULT '',
     vision_model TEXT DEFAULT 'gpt-4o',
     download_language_subtitles TEXT DEFAULT 'ru',
+    gpt_tokens INTEGER CHECK (gpt_tokens >= 100 AND gpt_tokens <= 200000) DEFAULT 4096,
     id_vision_panel INTEGER DEFAULT 0)
 """)
 

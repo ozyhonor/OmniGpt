@@ -192,7 +192,7 @@ languages = [
     ]
 
 settings_request = """
-<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🌡 <i>{1}</i></blockquote>\n<blockquote><i>🤖 {2}</i></blockquote>
+<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🌡 <i>{1}</i></blockquote>\n<blockquote><i>🤖 {2}</i></blockquote>\n<blockquote><i>📏 {3}</i></blockquote>
 """
 
 vision_request = """

@@ -7,19 +7,22 @@ from spawnbot import bot
 from config_reader import proxy_config
 
 
-async def download_subtitles_from_youtube(url, user_id):
+async def download_subtitles_from_youtube(url, user_id, language):
     proxy = proxy_config().get('http')
     command_subtitles = [
-        'yt-dlp',
+        "yt-dlp",
+        "--skip-download",
+        "--write-subs",
         "--cookies",
         "cookies.txt",
-        '--write-sub',
-        '--write-auto-subs',
-        '--convert-subs', 'srt',
-        '--skip-download',
-        '-o', f"subtitles/%(title)s.%(ext)s",
+        "--write-auto-subs",
+        "--sub-lang", language,
+        "--sub-format", "ttml",
+        "--convert-subs", "srt",
+        "--output", f"subtitles/%(title)s.%(ext)s",
         url
     ]
+
 
     if proxy:
         command_subtitles.insert(1, '--proxy')

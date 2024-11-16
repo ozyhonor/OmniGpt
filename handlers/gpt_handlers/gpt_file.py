@@ -53,8 +53,9 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     model = await db.get_user_setting('gpt_model', user_id)
+    tokens = await db.get_user_setting('gpt_tokens', user_id)
     result: bool = await bot.send_chat_action(user_id, 'typing')
-    chunks = split_text(text, model=model)
+    chunks = split_text(text, token=tokens)
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
     answer = await chunks_request(chunks, message, settings)

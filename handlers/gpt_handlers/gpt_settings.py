@@ -125,6 +125,34 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await state.clear()
 
+@gpt_settings.callback_query(F.data == '📏 Токен')
+async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    markup = keyboards.CustomKeyboard.inline_cancel()
+    await state.set_state(WaitingStateGpt.tokens)
+    await bot.send_message(user_id, '<b>Введите количество токенов в одном запросе ChatGpt</b>', reply_markup=markup)
+
+
+@gpt_settings.message(WaitingStateGpt.tokens)
+async def process_degree(message: Message, state: FSMContext) -> None:
+    user_id = message.from_user.id
+    panel_id = await db.get_user_setting('id_gpt_panel', user_id)
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
+    markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
+    try:
+        tokens = int(message.text)
+
+        if not(100<=tokens and tokens<=200_000):
+            raise ValueError
+        await db.update_user_setting('gpt_tokens', tokens, user_id)
+        await message.delete()
+        await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
+        new_text_settings = await reload_settings(user_id)
+        await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
+        await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+        await state.clear()
+    except ValueError:
+        print('123123')
 
 
 @gpt_settings.callback_query(F.data == '🌡 Градус')
@@ -139,7 +167,7 @@ async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) ->
 async def process_degree(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     panel_id = await db.get_user_setting('id_gpt_panel', user_id)
-    process_bool = await db.get_user_setting('process_bool', user_id)
+    process_bool = await db.get_user_setting('postprocess_bool', user_id)
     markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     try:
         degree = float(message.text)
@@ -162,7 +190,9 @@ async def reload_settings(user_id):
     settings = await db.get_user_setting('gpt', user_id)
     degree = await db.get_user_setting('degree', user_id)
     gpt_model = await db.get_user_setting('gpt_model', user_id)
+    gpt_tokens = await db.get_user_setting('gpt_tokens', user_id)
     new_settings = texts.settings_request.format(settings,
                                                  degree,
-                                                 gpt_model)
+                                                 gpt_model,
+                                                 gpt_tokens)
     return new_settings

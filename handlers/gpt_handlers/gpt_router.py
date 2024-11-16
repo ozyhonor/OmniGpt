@@ -16,6 +16,7 @@ async def create_gpt_request_for_request(message: Message):
     setting = await db.get_user_setting('gpt', user_id)
     degree = await db.get_user_setting('degree', user_id)
     model = await db.get_user_setting('gpt_model', user_id)
+    tokens = await db.get_user_setting('gpt_tokens', user_id)
 
     markup_reply = keyboards.CustomKeyboard.create_gpt_buttons()
     process_bool = await db.get_user_setting('postprocess_bool', user_id)
@@ -26,7 +27,7 @@ async def create_gpt_request_for_request(message: Message):
     postmodel = await db.get_user_setting('postmodel', user_id)
 
 
-    id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree, model), reply_markup=inline_reply)
+    id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree, model, tokens), reply_markup=inline_reply)
     id_gpt_panel = id_gpt_panel.message_id
     await db.update_user_setting('id_gpt_panel', id_gpt_panel, user_id)
 

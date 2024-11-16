@@ -6,7 +6,7 @@ cursor = conn.cursor()
 
 # Выполнение команды для добавления нового столбца
 try:
-    cursor.execute("ALTER TABLE users ADD COLUMN download_language_subtitles TEXT DEFAULT 'ru';")
+    cursor.execute("ALTER TABLE users ADD COLUMN gpt_tokens INTEGER CHECK (gpt_tokens >= 100 AND gpt_tokens <= 200000) DEFAULT 4096;")
     conn.commit()
     print("Поле download_language_subtitles успешно добавлено.")
 except sqlite3.OperationalError as e:
