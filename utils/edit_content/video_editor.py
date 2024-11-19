@@ -62,24 +62,72 @@ async def monitor_progress(logger_, u_id, m_id):
         await asyncio.sleep(3)
 
 
-async def process_videos(video_files, logger_, video_with_subtitles):
+# Асинхронная функция для нормализации видео
+async def normalize_video(video_path, output_path):
+    ffmpeg_command = [
+        "ffmpeg",
+        "-i", video_path,
+        "-c:v", "libx264",  # Видео кодек
+        "-b:v", "462k",  # Битрейт видео
+        "-c:a", "aac",  # Аудио кодек
+        "-b:a", "128k",  # Битрейт аудио
+        "-ar", "24000",  # Частота дискретизации
+        "-ac", "1",  # Каналы аудио (моно)
+        output_path
+    ]
+    process = await asyncio.create_subprocess_exec(*ffmpeg_command)
+    await process.communicate()
+
+# Асинхронная функция для создания файла со списком видео
+async def create_concatenate_file(video_files):
+    with open("chunks_video.txt", "w") as file:
+        for video in video_files:
+            file.write(f"file '{video}'\n")
+
+# Асинхронная функция для склеивания видео
+async def concatenate_videos(input_file, output_file):
+    ffmpeg_command = [
+        "ffmpeg",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", input_file,
+        "-c:v", "libx264",
+        "-c:a", "aac",
+        "-strict", "experimental",
+        output_file
+    ]
+    process = await asyncio.create_subprocess_exec(*ffmpeg_command)
+    await process.communicate()
+
+# Основная асинхронная функция для обработки видео
+async def process_videos(video_files, video_with_subtitles):
     # Создание списка клипов
     new_name = video_with_subtitles.replace('.mp4', 'omni.mp4')
 
-    clips = [VideoFileClip(video) for video in video_files]
+    clips = [f'file {video}' for video in video_files]
 
-    # Объединение клипов
-    final_clip = concatenate_videoclips(clips, method="compose")
+    with open('chunks_video.txt', 'w') as r:
+        for _ in clips:
+            r.write(_)
 
-    # Сохранение финального видео с использованием кастомного логгера
-    await asyncio.to_thread(
-        final_clip.write_videofile,
-        new_name,
-        codec='libx264',
-        audio_codec='aac',
-        logger=logger_
-    )
-    return new_name
+    # Параметры для нормализации видео
+    video_files_normalized = []
+
+    # Приводим все видео файлы к одинаковым параметрам
+    for video_path in video_files:
+        output_video_path = f"normalized_{os.path.basename(video_path)}"
+        await normalize_video(video_path, output_video_path)
+        video_files_normalized.append(output_video_path)
+
+    # Создаем файл для склеивания
+    await create_concatenate_file(video_files_normalized)
+
+    # Склеиваем видео файлы
+    output_file = "output_final.mp4"
+    await concatenate_videos("chunks_video.txt", output_file)
+
+    return output_file
+
 
 async def add_fade_in(input_file, fade_duration=0.3):
     temp_file = input_file.replace('.mp4', 'fade_in_.mp4')

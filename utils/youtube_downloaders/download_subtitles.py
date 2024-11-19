@@ -53,7 +53,20 @@ async def download_subtitles_from_youtube(url, user_id, language):
             if file.endswith('.srt'):
                 subtitle_file = file
                 logger.info(f"Subtitles downloaded successfully: {subtitle_file}")
-                return f'subtitles/{subtitle_file}'
+
+                output_file = subtitle_file.replace('.srt', 'e.txt')
+                with open('subtitles/'+output_file, 'w', encoding='utf-8') as outfile:
+                    with open('subtitles/'+subtitle_file, 'r', encoding='utf-8') as infile:
+                        for line in infile:
+                            # Удаляем строки с таймкодами и номера субтитров
+                            if re.match(r'^\d+$', line) or re.match(r'^\d{2}:\d{2}:\d{2},\d{3} -->', line):
+                                continue
+                            # Удаляем HTML-теги
+                            clean_line = re.sub(r'<[^>]*>', '', line).strip()
+                            if clean_line:  # Записываем только не пустые строки
+                                outfile.write(clean_line + '\n')
+
+                return f'subtitles/{output_file}'
     else:
         logger.error("Failed to find subtitles in yt-dlp output.")
         await bot.send_message(user_id, 'Субтитры недоступны')
