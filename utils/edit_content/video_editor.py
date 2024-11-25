@@ -66,6 +66,7 @@ async def monitor_progress(logger_, u_id, m_id):
 async def normalize_video(video_path, output_path):
     ffmpeg_command = [
         "ffmpeg",
+        "-y",
         "-i", video_path,
         "-c:v", "libx264",  # Видео кодек
         "-b:v", "462k",  # Битрейт видео
@@ -82,22 +83,26 @@ async def normalize_video(video_path, output_path):
 async def create_concatenate_file(video_files):
     with open("chunks_video.txt", "w") as file:
         for video in video_files:
+            print('я добавил видео', video)
             file.write(f"file '{video}'\n")
+    return "chunks_video.txt"
 
 # Асинхронная функция для склеивания видео
 async def concatenate_videos(input_file, output_file):
+    print('я получил...............',input_file)
     ffmpeg_command = [
         "ffmpeg",
+        "-y",
         "-f", "concat",
         "-safe", "0",
         "-i", input_file,
         "-c:v", "libx264",
         "-c:a", "aac",
-        "-strict", "experimental",
         output_file
     ]
     process = await asyncio.create_subprocess_exec(*ffmpeg_command)
     await process.communicate()
+    return output_file
 
 # Основная асинхронная функция для обработки видео
 async def process_videos(video_files, video_with_subtitles):
@@ -106,25 +111,21 @@ async def process_videos(video_files, video_with_subtitles):
 
     clips = [f'file {video}' for video in video_files]
 
-    with open('chunks_video.txt', 'w') as r:
-        for _ in clips:
-            r.write(_)
-
     # Параметры для нормализации видео
     video_files_normalized = []
 
     # Приводим все видео файлы к одинаковым параметрам
     for video_path in video_files:
-        output_video_path = f"normalized_{os.path.basename(video_path)}"
+        output_video_path = f"video/normalized_{os.path.basename(video_path)}"
         await normalize_video(video_path, output_video_path)
         video_files_normalized.append(output_video_path)
 
     # Создаем файл для склеивания
-    await create_concatenate_file(video_files_normalized)
+    video_txt_file = await create_concatenate_file(video_files_normalized)
 
     # Склеиваем видео файлы
-    output_file = "output_final.mp4"
-    await concatenate_videos("chunks_video.txt", output_file)
+    output_file = "video/output_final_video.mp4"
+    output_file = await concatenate_videos(video_txt_file, output_file)
 
     return output_file
 
@@ -477,7 +478,7 @@ async def process_video(video_path, user_id, message):
                     message_info_id = message_info.message_id
                     logger_ = MyBarLogger()
                     monitoring_task = asyncio.create_task(monitor_progress(logger_, user_id, message_info_id))
-                    new_video_path = await process_videos(all_chunks, logger_, video_with_subtitles)
+                    new_video_path = await process_videos(all_chunks, video_with_subtitles)
                     monitoring_task.cancel()
                     try:
                         await bot.edit_message_text('Склейка 100% ✅', chat_id=user_id, message_id=message_info_id)

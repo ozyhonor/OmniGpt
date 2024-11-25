@@ -3,6 +3,7 @@ from config_reader import gpt_tokens, proxy_config
 import aiohttp
 import asyncio
 import ssl
+import traceback
 import aiofiles
 from random import choice
 from setup_logger import logger
@@ -64,3 +65,4 @@ async def send_recognize_request(file, smart=False):
                 return output_file
     except Exception as e:
         logger.error(f'Error in recognize: {e}')
+        logger.debug(f"Traceback: {traceback.format_exc()}")

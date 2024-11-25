@@ -75,5 +75,4 @@ async def process_video_handler(message: Message, state: FSMContext):
     await state.clear()
     clear_directory('video')
     clear_directory('TmpVideo')
-    clear_directory('edit_content')
 
