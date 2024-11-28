@@ -78,8 +78,8 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
         document2 = FSInputFile(file_name)
         await bot.send_document(message.chat.id, document2)
 
-    os.remove("txt files/sorted GPT" + file_name)
-    os.remove(f'txt files/GPT{file_name}')
+    os.remove(f"txt files/{file_name}")
+    os.remove(f'txt files/sorted{file_name}')
     os.remove(f'{main_file_name[0]+main_file_name[1]}')
 
     await state.clear()

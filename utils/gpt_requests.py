@@ -171,5 +171,5 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
 
 
     logger.error("Max retries reached. Request failed.")
-    return None, '', None
+    return None, '-', None
 

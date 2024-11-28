@@ -125,7 +125,7 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await state.clear()
 
-@gpt_settings.callback_query(F.data == '📏 Токен')
+@gpt_settings.callback_query(F.data == '📏 Символы')
 async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     markup = keyboards.CustomKeyboard.inline_cancel()

@@ -54,7 +54,7 @@ async def process_video_handler(message: Message, state: FSMContext):
     #Скачать
     await message.answer('Скачиваю видео...')
     video_path = await download_video_from_youtube(url_video, user_id)
-    sanitized_video_path = re.sub(r'[^\w\-/\\\.]', '_', video_path)
+    sanitized_video_path = re.sub(r"[^A-Za-zА-Яа-я0-9/\\\.]", "_", video_path)
     if video_path != sanitized_video_path:
         os.rename(video_path, sanitized_video_path)
         video_path = sanitized_video_path
