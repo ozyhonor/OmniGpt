@@ -1,6 +1,7 @@
 from db.database import db
 from utils.download_from_googledrive import create_and_upload_file
 from aiogram import Router, F
+from utils.edit_content.local_requests.get_subtitles import send_recognize_request
 from utils.create_download_link import upload_to_fileio
 from aiogram.types import Message
 from utils.youtube_downloaders.download_video import download_video_from_youtube
@@ -11,8 +12,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import FSInputFile
 from states.states import WaitingYoutube
 from spawnbot import bot
+from utils.edit_content.video_editor import get_video_duration, calculate_length, trim_by_timecode
+from aiogram import types
 from menu import keyboards, texts
 import os
+import math
 from utils.edit_content.check_size import check_size
 from utils.edit_content.split_audio import split_audio
 from utils.download_subtitles import download_video_subtitles
@@ -41,6 +45,53 @@ async def create_youtube_subtitles(message: Message):
     await db.update_user_setting('id_youtube_panel', id_panel.message_id, user_id)
 
 
+@youtube_router.callback_query(lambda callback_query: callback_query.data.startswith('need_gen_sub:'))
+async def generate_subtitles(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    message_id = callback_query.message.message_id
+    message_text_from_message_with_callback_query = callback_query.message.text
+    link = message_text_from_message_with_callback_query.split('видео ')[1]
+    answer = callback_query.data.split(':')[1]
+    all_files = []
+    if answer == "✅ Да":
+        await bot.send_message(user_id, 'создаю')
+        audio_path = await download_audio_from_youtube(link)
+        duration = await get_video_duration(audio_path)
+        num_pieces = math.ceil(duration / 833)
+        audio_path_by_ten_minutes = []
+        for number_video_part in range(num_pieces):
+            ten_minutes_timecode = await calculate_length(number_video_part, duration)
+            start, end = ten_minutes_timecode['start'], ten_minutes_timecode['end']
+
+            if duration > end:
+                ten_minute_audio = await trim_by_timecode(audio_path, start, end)  # ?
+                audio_path_by_ten_minutes.append(ten_minute_audio)
+            else:
+                audio_path_by_ten_minutes.append(audio_path)
+
+            video_to_process = audio_path_by_ten_minutes[number_video_part]
+            subtitle_path = await send_recognize_request(audio_path, 'smart')
+            all_files.append(subtitle_path)
+
+
+        output_file_path = "txt files/gensub.txt"
+        with open(output_file_path, 'w', encoding='utf-8') as output_file:
+            for file_path in all_files:
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf-8') as input_file:
+                        content = input_file.read()
+                        output_file.write(content)
+                        output_file.write('\n\n')
+                else:
+                    print(f"Файл {file_path} не найден.")
+        subtitles_file = FSInputFile(output_file_path)
+        await bot.send_document(user_id, subtitles_file)
+        shutil.rmtree('subtitles')
+        os.makedirs('subtitles')
+        await bot.send_document(user_id, )
+
+    else:
+        await bot.delete_message(user_id,message_id)
 
 @youtube_router.message(F.text == '📥 Скачать')
 async def create_download_keyboard(message: Message, state: FSMContext):

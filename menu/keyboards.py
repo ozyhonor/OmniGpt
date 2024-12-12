@@ -242,6 +242,13 @@ class CustomKeyboard:
 
         return keyboard
 
+    @staticmethod
+    def create_generate_subtitles_button():
+        names_gender = ['✅ Да', '❌ Нет']
+        builder = InlineKeyboardBuilder()
+        for name in names_gender:
+            builder.button(text=f"{name}", callback_data=f"need_gen_sub:{name}")
+        return builder
 
 
     @staticmethod

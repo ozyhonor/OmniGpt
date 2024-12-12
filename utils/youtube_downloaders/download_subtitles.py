@@ -5,6 +5,7 @@ import re
 from setup_logger import logger
 from spawnbot import bot
 from config_reader import proxy_config
+from menu.keyboards import CustomKeyboard
 
 
 async def download_subtitles_from_youtube(url, user_id, language):
@@ -42,7 +43,8 @@ async def download_subtitles_from_youtube(url, user_id, language):
 
     if process_subtitles.returncode != 0:
         logger.error(f"Error occurred: {errors}")
-        await bot.send_message(user_id, 'Субтитры недоступны')
+        markup = CustomKeyboard.create_generate_subtitles_button().as_markup()
+        await bot.send_message(user_id, f'Субтитры недоступны, сгенерировать субтитры для видео {str(url)}', reply_markup=markup)
         return "Subtitles not available or download failed."
 
     # Обновленное регулярное выражение для поиска файла .srt после конвертации
@@ -69,5 +71,6 @@ async def download_subtitles_from_youtube(url, user_id, language):
                 return f'subtitles/{output_file}'
     else:
         logger.error("Failed to find subtitles in yt-dlp output.")
-        await bot.send_message(user_id, 'Субтитры недоступны')
+        markup = CustomKeyboard.create_generate_subtitles_button().as_markup()
+        await bot.send_message(user_id, f'Субтитры недоступны, сгенерировать субтитры для видео {url}', reply_markup=markup)
         return "Subtitles not available or download failed."

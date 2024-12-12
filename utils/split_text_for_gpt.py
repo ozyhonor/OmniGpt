@@ -17,5 +17,5 @@ def split_text(text: str, token) -> list:
 
     if current_chunk:
         chunks.append(current_chunk.strip())
-
+    print(f"""\n{chunks}\n""")
     return chunks

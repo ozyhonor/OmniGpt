@@ -1,3 +1,7 @@
+import traceback
+
+from markdownify import markdownify as md
+
 from aiogram import Router, F
 from aiogram.types import Message
 from db.database import db
@@ -25,7 +29,13 @@ async def go_gpt_text_request(message: Message, state: FSMContext) -> None:
     degree = await db.get_user_setting('degree', user_id)
     model = await db.get_user_setting('gpt_model', user_id)
     answer = await solo_request(None, message, degree, None, model)
-    print(answer[1])
     await message.answer(texts.water_mark_omnigpt.format(answer[2]))
-    await message.answer(f'{str(answer[1])}', parse_mode='Markdown')
+    try:
+
+        await message.answer(f'{str(answer[1])}', parse_mode="Markdown")
+    except:
+        print(traceback.format_exc())
+        await message.answer(texts.water_mark_omnigpt.format(answer[2]), parse_mode="HTML")
+
+
     await state.clear()
