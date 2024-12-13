@@ -51,5 +51,4 @@ def merge_ass_subtitles(original_file, translated_file, output_file):
         file.writelines(header)
         file.writelines(merged_dialogues)
 
-# Example usage:
-merge_ass_subtitles("How_to_create_the_perfect_date.ass", "How_to_create_the_perfect_date_translated.ass", "output.ass")
+# Example usag

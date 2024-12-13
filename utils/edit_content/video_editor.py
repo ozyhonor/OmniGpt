@@ -4,6 +4,7 @@ import aiofiles
 import srt
 from setup_logger import logger
 import os
+from utils.merage_sub_file import merge_ass_subtitles
 from utils.edit_content.local_requests.yandex_translate import translate_subtitles
 from utils.edit_content.local_requests.get_subtitles import send_recognize_request
 from utils.edit_content.support_scripts.convert_json_to_srt import json_to_srt
@@ -74,6 +75,7 @@ async def normalize_video(video_path, output_path):
         "-b:a", "128k",  # Битрейт аудио
         "-ar", "24000",  # Частота дискретизации
         "-ac", "1",  # Каналы аудио (моно)
+        "-r", "30",
         output_path
     ]
     process = await asyncio.create_subprocess_exec(*ffmpeg_command)
@@ -459,18 +461,25 @@ async def process_video(video_path, user_id, message):
                     subtitle_path = await json_to_srt(subtitle_path, overlap)
 
                 if subtitles:
-                    subtitle_path_to_add_sub = await srt_to_ass(subtitle_path, user_id)
 
-                    video_with_subtitles = await add_subtitles_to_video(video_to_process, subtitle_path_to_add_sub, user_id)
-                    print(video_with_subtitles)
+                    subtitle_path_to_add_sub = await srt_to_ass(subtitle_path, user_id)
+                    if translator:
+
+                        translated_subtitles = subtitle_path.replace('.srt', '_translated.srt')
+                        subtitle_path_to_add_sub_translated = await srt_to_ass(translated_subtitles, user_id,
+                                                                               marginv=0)
+
+                        merage_file = subtitle_path_to_add_sub.replace('.ass', '_merage.ass')
+                        merge_ass_subtitles(subtitle_path_to_add_sub,
+                                            subtitle_path_to_add_sub_translated, merage_file)
+
+                        video_with_subtitles = await add_subtitles_to_video(video_to_process, merage_file, user_id)
+                        print(video_with_subtitles)
 
 
 
                 if translator:
-                    translated_subtitles = subtitle_path.replace('.srt', '_translated.srt')
-                    subtitle_path_to_add_sub_translated = await srt_to_ass(translated_subtitles, user_id, marginv=30)
-                    video_with_subtitles = await add_subtitles_to_video(video_with_subtitles, subtitle_path_to_add_sub_translated,
-                                                                        user_id)
+
 
                     all_chunks = await create_all_chunks(video_with_subtitles, translated_subtitles, user_id)
 
