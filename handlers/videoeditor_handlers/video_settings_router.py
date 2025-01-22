@@ -803,6 +803,7 @@ async def reload_settings(user_id):
     smart_sub = dict_bool[await db.get_user_setting('smart_sub', user_id)]
     timestamps = await db.get_user_setting('timestamps', user_id)
     overlap = await db.get_user_setting('overlap', user_id)
+    interesting_moment = dict_bool[await db.get_user_setting('interesting_moment', user_id)]
 
     # Форматирование строки с настройками видео
     new_settings = texts.video_settings_message.format(
@@ -830,7 +831,8 @@ async def reload_settings(user_id):
         overlap=overlap,
         max_words=max_words,
         smart_sub=smart_sub,
-        timestamps=timestamps
+        timestamps=timestamps,
+        interesting_moment=interesting_moment
     )
 
     return new_settings

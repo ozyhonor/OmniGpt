@@ -94,7 +94,7 @@ async def vision_request(image_data, settings=None, model='gpt-4o', max_retries=
             logger.error(f"Exception occurred: {e}")
             return None, '', None
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector()) as session:
         for attempt in range(1, max_retries + 1):
             time_taken, answer, tokens_used = await make_request(session, attempt)
             if answer:

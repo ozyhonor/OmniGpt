@@ -125,12 +125,12 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await state.clear()
 
-@gpt_settings.callback_query(F.data == '📏 Символы')
+@gpt_settings.callback_query(F.data == '📏 Разделить')
 async def change_gpt_degree(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     markup = keyboards.CustomKeyboard.inline_cancel()
     await state.set_state(WaitingStateGpt.tokens)
-    await bot.send_message(user_id, '<b>Введите количество токенов в одном запросе ChatGpt</b>', reply_markup=markup)
+    await bot.send_message(user_id, '<b>Введите количество символов в одном запросе ChatGpt до 128 тыс. или разделяющую метку, пример: "#*#*#"</b>', reply_markup=markup)
 
 
 @gpt_settings.message(WaitingStateGpt.tokens)
@@ -140,10 +140,7 @@ async def process_degree(message: Message, state: FSMContext) -> None:
     process_bool = await db.get_user_setting('postprocess_bool', user_id)
     markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
     try:
-        tokens = int(message.text)
-
-        if not(100<=tokens and tokens<=200_000):
-            raise ValueError
+        tokens = message.text
         await db.update_user_setting('gpt_tokens', tokens, user_id)
         await message.delete()
         await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)

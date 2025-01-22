@@ -23,8 +23,6 @@ async def create_gpt_request_for_request(message: Message):
     inline_reply = ChatGpt.create_gpt_settings(process_bool)
 
     await message.answer(f'{texts.future_request_information.format(f_text)}', reply_markup=markup_reply)
-    process_settings = await db.get_user_setting('postprocess_settings', user_id)
-    postmodel = await db.get_user_setting('postmodel', user_id)
 
 
     id_gpt_panel = await message.answer(texts.settings_request.format(setting, degree, model, tokens), reply_markup=inline_reply)

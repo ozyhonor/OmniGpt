@@ -1,7 +1,7 @@
 import srt
 import asyncio
 import aiohttp
-import ssl
+
 import os
 import datetime
 from config_reader import yandex_api_key
@@ -20,14 +20,10 @@ async def translate_text(text, target_language="ru"):
         "texts": [text]
     }
 
-    # Установка SSL контекста (проверка SSL отключена)
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
 
     # Отправка запроса на перевод
     async with aiohttp.ClientSession() as session:
-        async with session.post(URL, json=body, headers=headers, ssl=ssl_context) as response:
+        async with session.post(URL, json=body, headers=headers) as response:
             if response.status == 200:
                 response_data = await response.json()
                 print(response_data)

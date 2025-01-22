@@ -2,7 +2,6 @@ from random import choice
 from config_reader import gpt_tokens, proxy_config
 import aiohttp
 import asyncio
-import ssl
 import traceback
 import aiofiles
 from random import choice
@@ -47,14 +46,11 @@ async def send_recognize_request(file, smart=False):
     else:
         proxy_auth = None
 
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, data=form_data, proxy=proxy_url, proxy_auth=proxy_auth,
-                                    ssl=ssl_context) as response:
+            async with session.post(url, headers=headers, data=form_data, proxy=proxy_url, proxy_auth=proxy_auth) as response:
                 response_text = await response.text()
                 print(response_text)
 

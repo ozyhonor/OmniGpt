@@ -40,7 +40,7 @@ def merge_ass_subtitles(original_file, translated_file, output_file):
         trans_text = trans_parts[9].strip()
 
         # Merge the dialogue texts with a newline separator
-        merged_text = f"{orig_text}\\N{trans_text}"
+        merged_text = f"{trans_text}\\N{orig_text}"
 
         # Reassemble the dialogue line
         merged_dialogue = ",".join(orig_parts[:9]) + f",{merged_text}\n"

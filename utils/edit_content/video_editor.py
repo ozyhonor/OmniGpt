@@ -210,19 +210,15 @@ async def replace_audio(video_path, audio_path):
     return output_video
 
 
-async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id: int):
+async def add_subtitles_to_video(input_video: str, input_subtitles: str):
     output_video = input_video.replace('.mp4', '_ws.mp4')
-    info_message = await bot.send_message(user_id, 'Cубтитры: 0')
 
-    info_message_text = info_message.text
-    info_message_id = info_message.message_id
-
+    # Команда для наложения субтитров
     command = [
         'ffmpeg',
         '-y',
         '-i', f'{input_video}',
         '-vf', f"subtitles='{input_subtitles}'",
-        '-progress', 'pipe:1',
         f'{output_video}'
     ]
 
@@ -230,49 +226,27 @@ async def add_subtitles_to_video(input_video: str, input_subtitles: str, user_id
     logger.info(f"Running command: {' '.join(command)}")
     print(f"Running command: {' '.join(command)}")
 
+    # Запускаем процесс
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
 
-    last_time = time.time()
-
-    while True:
-        output = await process.stdout.readline()
-        if process.returncode is not None and output == b'':
-            break
-        if output:
-            output = output.decode().strip()
-            # Логируем и выводим каждый вывод `ffmpeg` в консоль
-            logger.info(output)
-            print(output)
-
-            frame_match = re.search(r'frame=\s*(\d+)', output)
-            frame = frame_match.group(1) if frame_match else 'N/A'
-            current_time = time.time()
-
-            if (current_time - last_time >= 4) and (info_message_text != f'Cубтитры: {frame}'):
-                try:
-                    await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: {frame}')
-                except:
-                    ...
-                last_time = current_time
-
-    await process.wait()
+    # Ожидаем завершения процесса и считываем его вывод
     stdout, stderr = await process.communicate()
 
-    # Логируем и выводим завершение процесса
+    # Обрабатываем завершение процесса
     if process.returncode == 0:
         logger.info("Video successfully processed!")
         print("Video successfully processed!")
-        await bot.edit_message_text(chat_id=user_id, message_id=info_message_id, text=f'Cубтитры: 100% ✅')
     else:
-        error_message = f"Process ended with return code {process.returncode}. Please check the output above for errors."
+        error_message = f"Process ended with return code {process.returncode}. Please check the error output below."
         logger.error(error_message)
         print(error_message)
-        logger.error(f"Error output: {stderr.decode('utf-8')}")
-        print(f"Error output: {stderr.decode('utf-8')}")
+        logger.error(stderr.decode('utf-8'))
+        print(stderr.decode('utf-8'))
+
     return output_video
 
 
@@ -428,6 +402,8 @@ async def process_video(video_path, user_id, message):
     words_per_chunk:int = await db.get_user_setting('max_words', user_id)
     overlap:int = await db.get_user_setting('overlap', user_id)
     max_duration_seconds = 600 # time to send to recognize
+
+
 
     new_video_path = None
 

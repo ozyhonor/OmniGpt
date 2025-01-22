@@ -73,6 +73,5 @@ async def process_video_handler(message: Message, state: FSMContext):
     os.remove(new_video_path)
 
     await state.clear()
-    clear_directory('video')
-    clear_directory('TmpVideo')
+
 

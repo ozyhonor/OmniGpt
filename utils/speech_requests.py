@@ -46,7 +46,7 @@ async def openai_audio_request(voice, input_text, output_file, speed, model='tts
         }
 
         try:
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector()) as session:
                 async with session.post(url, json=data, headers=headers,
                                         proxy=str(proxy) if proxy else None) as response:
                     response.raise_for_status()

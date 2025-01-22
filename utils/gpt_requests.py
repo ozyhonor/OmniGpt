@@ -159,9 +159,9 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
             logger.error(f"Exception occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
             logger.error(f"Result gpt ans: {result}")
-            return 0, '', 0
+            return 0, '-', 0
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector()) as session:
         for attempt in range(1, max_retries + 1):
             time_taken, answer, tokens_used = await make_request(session, attempt, text)
             if answer:

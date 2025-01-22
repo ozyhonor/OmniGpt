@@ -53,9 +53,14 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     model = await db.get_user_setting('gpt_model', user_id)
-    tokens = await db.get_user_setting('gpt_tokens', user_id)
+    marks = await db.get_user_setting('gpt_tokens', user_id)
     result: bool = await bot.send_chat_action(user_id, 'typing')
-    chunks = split_text(text, token=tokens)
+    try:
+        marks = int(marks)
+        symbol = None
+    except:
+        symbol = marks
+    chunks = split_text(text, token=marks, symbol=symbol)
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
     answer = await chunks_request(chunks, message, settings)
@@ -64,6 +69,10 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
 
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'
+
+    with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
+        for answer in answer[1]:
+            file.write(answer + "\n\n")
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 

@@ -1,8 +1,9 @@
 import re
 
 
-def split_text(text: str, token) -> list:
-
+def split_text(text: str, token, symbol=None) -> list:
+    if symbol:
+        return text.split(symbol)
     pattern = re.compile(r'(?<=[\n.!?])')
     sentences = pattern.split(text)
     current_chunk = ''
