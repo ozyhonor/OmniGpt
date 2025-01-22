@@ -139,17 +139,15 @@ async def process_degree(message: Message, state: FSMContext) -> None:
     panel_id = await db.get_user_setting('id_gpt_panel', user_id)
     process_bool = await db.get_user_setting('postprocess_bool', user_id)
     markup = keyboards.ChatGpt.create_gpt_settings(process_bool)
-    try:
-        tokens = message.text
-        await db.update_user_setting('gpt_tokens', tokens, user_id)
-        await message.delete()
-        await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
-        new_text_settings = await reload_settings(user_id)
-        await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
-        await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
-        await state.clear()
-    except ValueError:
-        print('123123')
+    tokens = message.text
+    await db.update_user_setting('gpt_tokens', tokens, user_id)
+    await message.delete()
+    await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
+    new_text_settings = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text_settings)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    await state.clear()
+
 
 
 @gpt_settings.callback_query(F.data == '🌡 Градус')

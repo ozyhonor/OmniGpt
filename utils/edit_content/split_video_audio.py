@@ -2,7 +2,7 @@ import math
 from utils.edit_content.local_requests.get_subtitles import send_recognize_request
 from utils.edit_content.support_scripts.convert_json_to_srt import json_to_srt
 import subprocess
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 import shutil
 
 def split_video_and_get_subtitles(smart, video_path, output_dir, max_duration_minutes=15, words_per_chunk=6, overlap=0):

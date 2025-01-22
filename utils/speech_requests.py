@@ -14,7 +14,7 @@ import concurrent.futures
 from time import time
 from time import time
 from utils.decode_any_format import TYPE_TXT_FILE
-from moviepy.editor import AudioFileClip, concatenate_audioclips
+from moviepy import AudioFileClip, concatenate_audioclips
 
 import aiohttp
 import aiofiles

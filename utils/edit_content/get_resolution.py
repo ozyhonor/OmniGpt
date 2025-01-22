@@ -1,4 +1,4 @@
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 
 def get_video_resolution(video_path):
     video_clip = VideoFileClip(video_path)

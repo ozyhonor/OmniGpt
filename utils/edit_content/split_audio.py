@@ -1,6 +1,4 @@
 import subprocess
-from moviepy.editor import VideoFileClip
-import shutil
 
 
 def split_audio(video_name):

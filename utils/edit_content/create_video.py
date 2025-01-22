@@ -1,5 +1,5 @@
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
-from moviepy.editor import concatenate_videoclips
+from moviepy import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
+from moviepy import concatenate_videoclips
 from random import randint
 from utils.speech_requests import openai_audio_request
 from utils.edit_content.create_translate import create_translate_text

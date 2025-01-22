@@ -17,7 +17,7 @@ import time
 import math
 
 from proglog import ProgressBarLogger
-from moviepy.editor import VideoFileClip, concatenate_videoclips
+
 
 
 class MyBarLogger(ProgressBarLogger):
