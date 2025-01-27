@@ -54,7 +54,6 @@ video_settings_message = (
 Нахлёст: {overlap}
 Умные субтитры: {smart_sub}
 Нарезать видео: {timestamps}
-Интересные моменты: {intrested_moment}
 '''
 )
 

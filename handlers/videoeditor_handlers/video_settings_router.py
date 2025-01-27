@@ -251,12 +251,11 @@ async def change_outline_color(message: Message, state: FSMContext):
     user_id = message.from_user.id
     panel_id = await db.get_user_setting('id_settings_panel', user_id)
     markup = CustomKeyboard.inline_outline_color()
-    if is_hex_color(message.text):
-        color = message.text[::-1]
-        await db.update_user_setting('outline_color', color, user_id)
-        new_text = await reload_settings(user_id)
-        await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
-        await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
+    color = message.text
+    await db.update_user_setting('outline_color', color, user_id)
+    new_text = await reload_settings(user_id)
+    await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
+    await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await message.delete()
     await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id - 1)
     await state.clear()
@@ -831,8 +830,7 @@ async def reload_settings(user_id):
         overlap=overlap,
         max_words=max_words,
         smart_sub=smart_sub,
-        timestamps=timestamps,
-        interesting_moment=interesting_moment
+        timestamps=timestamps
     )
 
     return new_settings

@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS users (
     format TEXT DEFAULT 'MP4',
     quality TEXT DEFAULT 'original',
     translator BOOLEAN DEFAULT 0,
-    intrested_moment
+    intrested_moment ,
     -- Нарезать видео
     interesting_moment BOOLEAN DEFAULT 0,
     timestamps TEXT DEFAULT '0',
@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS users (
     background BOOLEAN DEFAULT 0,
     background_color TEXT DEFAULT '0,0,0,0',
     max_words INTEGER DEFAULT 1,
+    shadow BOOLEAN DEFAULT 0,
     shadow_color TEXT DEFAULT '255,255,255,0',
 
     -- Подгруппа "Музыка"

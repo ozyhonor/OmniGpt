@@ -6,10 +6,8 @@ from config_reader import proxy_config
 async def create_translate_text(text, dest='ru'):
     proxy = proxy_config()
 
-    # Настройка прокси для aiohttp
-    connector = aiohttp.TCPConnector(ssl=False)
-    async with aiohttp.ClientSession(connector=connector) as session:
-        # Обновление прокси для сессии
+    async with aiohttp.ClientSession() as session:
+
         session.proxies = proxy
 
         translator = Translator()
@@ -18,9 +16,15 @@ async def create_translate_text(text, dest='ru'):
         attempt = 0
         while attempt < max_attempts:
             try:
-                result = await asyncio.get_event_loop().run_in_executor(
-                    None, translator.translate, text, dest)
-                translated_text = result.text
+                # Здесь предполагается, что translator.translate возвращает корутину
+                result = await translator.translate(text, dest=dest)
+
+                # Если 'result' поддерживает асинхронные свойства
+                if asyncio.iscoroutine(result.text):
+                    translated_text = await result.text
+                else:
+                    translated_text = result.text
+
                 return translated_text
             except Exception as e:
                 print(f"Attempt {attempt+1} failed with error: {e}")
