@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 import re
 from utils.edit_content.split_video_audio import split_video_and_get_subtitles
 from menu.keyboards import CustomKeyboard
-from utils.create_download_link import upload_to_fileio
+from utils.create_download_link import upload_to_gofileio
 import os
 from utils.edit_content.slow_down_speed import slow_down_speed
 from aiogram.types.input_file import FSInputFile
@@ -64,7 +64,7 @@ async def process_video_handler(message: Message, state: FSMContext):
     new_video_path = await process_video(video_path, user_id, message)
 
     if check_size(new_video_path):
-        link = await upload_to_fileio(new_video_path)
+        link = await upload_to_gofileio(new_video_path)
         await bot.send_message(chat_id=user_id, text=f'Видео скачено!\n{link}')
     else:
         video = FSInputFile(new_video_path)

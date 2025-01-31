@@ -13,7 +13,7 @@ from utils.decode_any_format import detect_file_format
 import shutil
 from utils.split_text_for_gpt import split_text
 from utils.speech_requests import file_request
-from utils.create_download_link import upload_to_fileio
+from utils.create_download_link import upload_to_gofileio
 
 
 speech_file_router = Router()
@@ -40,7 +40,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext) -> None:
 
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     print(text)
-    chunks = split_text(text)
+    chunks = split_text(text, 3500)
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n', reply_markup=markup)
 
     answer = await file_request(chunks, message)
@@ -51,7 +51,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext) -> None:
 
     file_size_mb = file_size_bytes / (1024 ** 2)
     if file_size_mb > 47:
-        link = await upload_to_fileio('audio_files/output.mp3')
+        link = await upload_to_gofileio('audio_files/output.mp3')
         await message.answer(f'Ваша ссылка на файл: {link}')
         shutil.rmtree('audio_files')
         os.makedirs('audio_files')

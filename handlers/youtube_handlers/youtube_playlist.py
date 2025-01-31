@@ -15,7 +15,7 @@ from utils.decode_any_format import detect_file_format
 import shutil
 from utils.split_text_for_gpt import split_text
 from utils.speech_requests import file_request
-from utils.create_download_link import upload_to_fileio
+from utils.create_download_link import upload_to_gofileio
 
 
 youtube_playlist_router = Router()

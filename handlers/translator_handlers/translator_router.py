@@ -120,13 +120,12 @@ async def go_translate_request(message: Message, state: FSMContext, settings=Non
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'
     print(text)
-    chunks = split_text(text)
+    chunks = split_text(text, token=2499)
     dest = await db.get_user_setting('dest_lang', message.from_user.id)
     new_ = []
     await message.answer(f'<b>Количество запросов в файле</b>: {len(chunks)}\n')
     for _ in chunks:
         a = await create_translate_text(_, dest=dest)
-        print(a)
         new_.append(a)
     with open(f"txt files/Omni_{file_name}", "w", encoding="utf-8") as file:
         for answer in new_ or 'OmniBot':
