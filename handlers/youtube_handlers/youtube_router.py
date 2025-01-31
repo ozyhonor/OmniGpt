@@ -2,7 +2,7 @@ from db.database import db
 from utils.download_from_googledrive import create_and_upload_file
 from aiogram import Router, F
 from utils.edit_content.local_requests.get_subtitles import send_recognize_request
-from utils.create_download_link import upload_to_gofileio
+from utils.create_download_link import upload_file_to_gDisk
 from aiogram.types import Message
 from utils.youtube_downloaders.download_video import download_video_from_youtube
 from utils.youtube_downloaders.download_audio import download_audio_from_youtube
@@ -114,7 +114,7 @@ async def download_content(message: Message, state: FSMContext):
     await bot.send_chat_action(message.from_user.id, 'typing')
     subtitle_path = await download_subtitles_from_playlist(link, user_id, language=target_lang, message=message)
     if check_size(subtitle_path):  # content > 25 mb
-        fileio_link = await upload_to_gofileio(subtitle_path)
+        fileio_link = await upload_file_to_gDisk(subtitle_path)
         await bot.send_message(user_id, fileio_link)
     else:
         combined_sub = FSInputFile(subtitle_path)
@@ -143,7 +143,7 @@ async def download_content(message: Message, state: FSMContext):
         await bot.send_chat_action(user_id, 'upload_video')
         video_path = await download_video_from_youtube(link, user_id)
         if check_size(video_path): # content > 25 mb
-            fileio_link = await upload_to_gofileio(video_path)
+            fileio_link = await upload_file_to_gDisk(video_path)
             await bot.send_message(user_id, fileio_link)
         else:
             video = FSInputFile(video_path)
@@ -154,7 +154,7 @@ async def download_content(message: Message, state: FSMContext):
         await bot.send_chat_action(user_id, 'upload_audio')
         audio_path = await download_audio_from_youtube(link)
         if check_size(audio_path):
-            fileio_link = await upload_to_gofileio(audio_path)
+            fileio_link = await upload_file_to_gDisk(audio_path)
             await bot.send_message(user_id, fileio_link)
         else:
             audio = FSInputFile(audio_path)

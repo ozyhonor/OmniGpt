@@ -1,4 +1,6 @@
 import configparser
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
 
 config = configparser.ConfigParser()
 config.read('./keys.ini')
@@ -6,6 +8,14 @@ config.read('./keys.ini')
 gpt_tokens = config.get('gpt', 'keys').split(',')
 print(len(gpt_tokens), 'tokens')
 
+gofile_api_key = config.get('gofileio', 'api_key')
+
+
+SERVICE_ACCOUNT_FILE = "client_secrets.json"
+SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+service = build("drive", "v3", credentials=creds)
 
 def proxy_config():
 

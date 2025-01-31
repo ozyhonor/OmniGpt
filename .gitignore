@@ -47,6 +47,7 @@ wheels/
 *.log
 *.sql
 *.db
+*.json
 
 draft2.py
 draft3.py
