@@ -1,60 +1,66 @@
-import os
+from random import choice
+from config_reader import gpt_tokens, proxy_config
+import aiohttp
 import asyncio
-import time
+import traceback
+import aiofiles
+from random import choice
+from setup_logger import logger
+from yarl import URL
 
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
-from google.oauth2.service_account import Credentials
-from googleapiclient.errors import HttpError
 
-
-SERVICE_ACCOUNT_FILE = "client_secrets.json"
-SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-
-creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-service = build("drive", "v3", credentials=creds)
-
-# Функция для загрузки файла
-def upload_file_sync(file_url: str):
-    try:
-        # Файл для загрузки
-        file_metadata = {"name": os.path.basename(file_url)}
-        media = MediaFileUpload(file_url, resumable=True)
-
-        # Загружаем файл
-        file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-
-        file_id = file.get("id")
-        file_link = f"https://drive.google.com/file/d/{file_id}/view"
-
-        # Устанавливаем разрешение на публичный доступ
-        service.permissions().create(
-            fileId=file_id,
-            body={"role": "reader", "type": "anyone"},
-        ).execute()
-
-        return file_link
-
-    except HttpError as error:
-        print(f"Произошла ошибка при загрузке файла: {error}")
-        return None
-
-# Асинхронная обертка для запуска синхронной функции в другом потоке
-async def upload_file(file_url: str):
-    # Запускаем синхронную функцию в другом потоке
-    file_link = await asyncio.to_thread(upload_file_sync, file_url)
-    if file_link:
-        print(f"✅ Файл успешно загружен! Вот ссылка: {file_link}")
+async def send_recognize_request(file, smart=False):
+    logger.info(f'Send recognize {file}')
+    if smart:
+        format = '.txt'
+        data = {
+            'model': 'whisper-1',
+            'response_format': 'text'
+        }
     else:
-        print("❌ Произошла ошибка при загрузке файла.")
+        format = '.json'
+        data = {
+            'model': 'whisper-1',
+            'response_format': 'verbose_json',
+            'timestamp_granularities[]': 'word',
+            'language': 'en'
+        }
+
+    api_key = choice(gpt_tokens)
+    url = 'https://api.openai.com/v1/audio/transcriptions'
+    headers = {'Authorization': f'Bearer {api_key}'}
+
+    async with aiofiles.open(file, 'rb') as f:
+        file_data = await f.read()
+
+    form_data = aiohttp.FormData()
+    form_data.add_field('file', file_data, filename=file, content_type='audio/mpeg')
+    for key, value in data.items():
+        form_data.add_field(key, value)
+
+    proxy_url = proxy_config()['http']
+    parsed_url = URL(proxy_url)
+    if parsed_url.user and parsed_url.password:
+        proxy_auth = aiohttp.BasicAuth(parsed_url.user, parsed_url.password)
+        proxy_url = str(parsed_url.with_user(None).with_password(None))
+    else:
+        proxy_auth = None
 
 
-# Пример асинхронного вызова функции
-async def main():
-    file_url = "audio/output.mp3"  # Пример пути к файлу
-    await upload_file(file_url)
 
-# Запуск асинхронной программы
-if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, data=form_data, proxy=proxy_url, proxy_auth=proxy_auth) as response:
+                response_text = await response.text()
+                print(response_text)
+
+                output_file = file.replace('.m4a', format)
+                async with aiofiles.open(output_file, 'w', encoding='utf-8') as f:
+                    await f.write(response_text)
+                logger.info(f'Recognize successful done with outputfile {output_file    }')
+                return output_file
+    except Exception as e:
+        logger.error(f'Error in recognize: {e}')
+        logger.debug(f"Traceback: {traceback.format_exc()}")
+
+asyncio.run(send_recognize_request('fileeeee.m4a', smart=True))

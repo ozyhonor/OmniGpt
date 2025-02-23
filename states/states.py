@@ -10,6 +10,7 @@ class WaitingYoutube(StatesGroup):
     video = State()
     playlist = State()
     link = State()
+    split_play_list = State()
 
 
 class WaitingStateTranslator(StatesGroup):

@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS users (
     download_video BOOLEAN DEFAULT 0,
     download_audio BOOLEAN DEFAULT 0,
     download_language_subtitles TEXT DEFAULT 'ru',
+    split_play_list TEXT DEFAULT '#*#*#',
     
 
     -- Настройки для обработки видео

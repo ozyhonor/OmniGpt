@@ -36,11 +36,13 @@ async def create_youtube_subtitles(message: Message):
     down_sub = dict_bool[await db.get_user_setting('download_subtitles', user_id)]
     down_vid = dict_bool[await db.get_user_setting('download_video', user_id)]
     down_aud = dict_bool[await db.get_user_setting('download_audio', user_id)]
+    split_play_list = await db.get_user_setting('split_play_list', user_id)
     down_lang = await db.get_user_setting('download_language_subtitles', user_id)
     id_panel = await message.answer(texts.youtube_download_settings.format(down_sub,
                                                                            down_vid,
                                                                            down_aud,
-                                                                           down_lang),
+                                                                           down_lang,
+                                                                           split_play_list),
                                     reply_markup=buttons2)
     await db.update_user_setting('id_youtube_panel', id_panel.message_id, user_id)
 
@@ -111,8 +113,11 @@ async def download_content(message: Message, state: FSMContext):
     link = message.text
     user_id = message.from_user.id
     target_lang = await db.get_user_setting('download_language_subtitles', user_id)
+    split_simbol = await db.get_user_setting('split_play_list', user_id)
+    if split_simbol == '❌':
+        split_simbol = ''
     await bot.send_chat_action(message.from_user.id, 'typing')
-    subtitle_path = await download_subtitles_from_playlist(link, user_id, language=target_lang, message=message)
+    subtitle_path = await download_subtitles_from_playlist(link, user_id, language=target_lang, message=message, split_simbol=split_simbol)
     if check_size(subtitle_path):  # content > 25 mb
         fileio_link = await upload_file_to_gDisk(subtitle_path)
         await bot.send_message(user_id, fileio_link)

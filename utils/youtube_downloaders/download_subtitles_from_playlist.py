@@ -82,7 +82,7 @@ async def download_subtitles_from_video(video_url, language, number, proxy=None)
 
 
 
-async def download_subtitles_from_playlist(playlist_url, user_id, language='ru', message:Message = None):
+async def download_subtitles_from_playlist(playlist_url, user_id, language='ru', message:Message = None, split_simbol =''):
     proxy = proxy_config().get('http')
     user_id = message.from_user.id
     command_list_videos = [
@@ -148,7 +148,9 @@ async def download_subtitles_from_playlist(playlist_url, user_id, language='ru',
                         clean_line = re.sub(r'<[^>]*>', '', line).strip()
                         if clean_line:  # Записываем только не пустые строки
                             outfile.write(clean_line + '\n')
+                outfile.write("\n"+split_simbol+"\n")
             except:
                 logger.error('No file '+ input_file)
+
 
     return output_file

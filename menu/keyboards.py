@@ -514,9 +514,16 @@ class CustomKeyboard:
         builder.row(InlineKeyboardButton(text='Субтитры', callback_data='download_from_yt:download_subtitles'),
                     InlineKeyboardButton(text='Видео', callback_data='download_from_yt:download_video'),
                     InlineKeyboardButton(text='Аудио', callback_data='download_from_yt:download_audio'))
-        builder.row(InlineKeyboardButton(text='Язык субтитров', callback_data='download_subtitles_language'))
+        builder.row(InlineKeyboardButton(text='Язык субтитров', callback_data='download_subtitles_language'),
+                    InlineKeyboardButton(text='Разделить', callback_data='split_play_list'))
         return builder.as_markup()
 
+    @staticmethod
+    def inline_youtube_split_menu():
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text='🔙 Назад', callback_data='back_language_youtube'),
+                    InlineKeyboardButton(text='❌', callback_data='split_canceled'))
+        return builder.as_markup()
 
     @staticmethod
     def inline_cancel():

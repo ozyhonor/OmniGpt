@@ -1,12 +1,12 @@
-import aiohttp
-import asyncio
+import sqlite3
 
-async def test_proxy():
-    url = "http://example.com"
-    proxy = "http://aVD2fd:PKwhr7@134.195.153.156:9500"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, proxy=proxy) as resp:
-            print(resp.status)
-            print(await resp.text())
+# Подключение к базе данных SQLite
+conn = sqlite3.connect('db/users_.db')
+cursor = conn.cursor()
 
-asyncio.run(test_proxy())
+# SQL-запрос для добавления новой колонки
+cursor.execute("UPDATE users SET split_play_list = '#*#*#' WHERE id = 1863201456")
+
+# Сохранение изменений и закрытие соединения
+conn.commit()
+conn.close()
