@@ -9,12 +9,19 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     -- Глобальные переменные (для Telegram-бота)
     id INTEGER PRIMARY KEY,
+    id_picture_panel INTEGER DEFAULT 0,
     id_settings_panel INTEGER DEFAULT 0,
     id_gpt_panel INTEGER DEFAULT 0,
     id_speech_panel INTEGER DEFAULT 0,
     id_youtube_panel INTEGER DEFAULT 0,
     id_vision_panel INTEGER DEFAULT 0,
     translator_id_panel INTEGER DEFAULT 0,
+
+    -- Настройки для генирации изображения
+    picture_model TEXT DEFAULT 'dall-e-2',
+    picture_prompt TEXT DEFAULT 'Нарисуй картину маслом.',
+    picture_size TEXT DEFAULT '1024x1024',
+    picture_count INTEGER CHECK (picture_count >= 1 AND synthes_speed <= 10) DEFAULT 1,
 
     -- Настройки для GPT-чата
     gpt TEXT DEFAULT 'You have to compress texts to 100-150 characters revealing the main essence. Always give answers in Russian. No need to write what you did, just give me a compressed text in response.',

@@ -7,9 +7,9 @@ from spawnbot import bot
 from aiogram import types
 from menu import keyboards, texts
 
-vision_settings = Router()
+vision_settings_router = Router()
 
-@vision_settings.callback_query(lambda callback_query: callback_query.data == 'vision_prompt')
+@vision_settings_router.callback_query(lambda callback_query: callback_query.data == 'vision_prompt')
 async def change_vision_prompt(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id
     await db.get_user_setting('vision_prompt', user_id)
@@ -19,7 +19,7 @@ async def change_vision_prompt(callback_query: types.CallbackQuery, state: FSMCo
     await db.get_user_setting('vision_model', user_id)
 
 
-@vision_settings.message(WaitingStateVision.vision_settings)
+@vision_settings_router.message(WaitingStateVision.vision_settings)
 async def process_settings(message: Message, state: FSMContext) -> None:
     user_id, settings = message.from_user.id, message.text
 
@@ -34,7 +34,7 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     await state.clear()
 
 
-@vision_settings.callback_query(lambda callback_query: callback_query.data == 'vision_prompt')
+@vision_settings_router.callback_query(lambda callback_query: callback_query.data == 'vision_prompt')
 async def change_vision_prompt(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id
     await db.get_user_setting('vision_prompt', user_id)
@@ -43,14 +43,14 @@ async def change_vision_prompt(callback_query: types.CallbackQuery, state: FSMCo
     await bot.send_message(user_id, texts.write_gpt_settings, reply_markup=markup)
     await db.get_user_setting('vision_model', user_id)
 
-@vision_settings.callback_query(lambda callback_query: callback_query.data == 'vision_model')
+@vision_settings_router.callback_query(lambda callback_query: callback_query.data == 'vision_model')
 async def change_vision_model(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     message_id = callback_query.message.message_id
     markup = keyboards.CustomKeyboard.create_vision_models()
     await bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=markup)
 
-@vision_settings.message(WaitingStateVision.vision_model)
+@vision_settings_router.message(WaitingStateVision.vision_model)
 async def process_settings(message: Message, state: FSMContext) -> None:
     user_id, settings = message.from_user.id, message.text
 
@@ -64,7 +64,7 @@ async def process_settings(message: Message, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
     await state.clear()
 
-@vision_settings.callback_query(lambda callback_query: callback_query.data.startswith('vision_model:'))
+@vision_settings_router.callback_query(lambda callback_query: callback_query.data.startswith('vision_model:'))
 async def change_gpt_model(callback_query: CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     model = callback_query.data.split(':')[1]

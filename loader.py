@@ -19,7 +19,9 @@ from handlers.videoeditor_handlers.video_editor_router import video_editor_route
 from handlers.youtube_handlers.youtube_settings import youtube_settings_router
 from handlers.vision.vision_router import vision_router
 from handlers.translator_handlers.translator_router import translator_router
-from handlers.vision.vision_settings import vision_settings
+from handlers.vision.vision_settings import vision_settings_router
+from handlers.picture_generation.picture_router import picture_router
+
 import sys
 import logging
 import asyncio
@@ -62,7 +64,9 @@ async def main() -> None:
         translator_router,
         vision_router,
         vision_photo_router,
-        vision_settings
+        vision_settings_router,
+        picture_router
+
     )
     await dp.start_polling(bot, on_startup=on_startup)
 

@@ -155,6 +155,30 @@ class CustomKeyboard:
         return keyboard
 
     @staticmethod
+    def create_picture_buttons():
+
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [
+                    KeyboardButton(text='◀️ Назад'),
+                    KeyboardButton(text='🖼 Картинка')
+                ]
+                ],  resize_keyboard=True)
+
+        return keyboard
+
+    @staticmethod
+    def create_inline_picture_settings():
+        builder = InlineKeyboardBuilder()
+        builder.row(
+            InlineKeyboardButton(text='⚙️ Настройки', callback_data='settings_picture'),
+            InlineKeyboardButton(text='🤖 Модель', callback_data='model_picture'),
+            InlineKeyboardButton(text='📏 Размер', callback_data='size_picture'),
+            InlineKeyboardButton(text='🔢 Количество', callback_data='quantity_picture')
+        )
+        return builder.as_markup()
+
+    @staticmethod
     def create_translator_buttons():
 
         keyboard = ReplyKeyboardMarkup(
@@ -280,6 +304,7 @@ class CustomKeyboard:
                     KeyboardButton(text='🚩 Ютуб'),
                     KeyboardButton(text='🔄 Переводчик'),
                     KeyboardButton(text='👁‍🗨 Зрение'),
+                    KeyboardButton(text='👨‍🎨 Визуализация'),
                     KeyboardButton(text='🎥 Видео')
                 ]
                 ],  resize_keyboard=True)

@@ -5,7 +5,11 @@ conn = sqlite3.connect('db/users_.db')
 cursor = conn.cursor()
 
 # SQL-запрос для добавления новой колонки
-cursor.execute("UPDATE users SET split_play_list = '#*#*#' WHERE id = 1863201456")
+cursor.execute("ALTER TABLE users ADD COLUMN picture_model TEXT DEFAULT 'dall-e-2'")
+cursor.execute("ALTER TABLE users ADD COLUMN picture_prompt TEXT DEFAULT 'Нарисуй картину маслом.'")
+cursor.execute("ALTER TABLE users ADD COLUMN picture_size TEXT DEFAULT '1024x1024'")
+cursor.execute("ALTER TABLE users ADD COLUMN picture_count INTEGER CHECK (picture_count >= 1 AND synthes_speed <= 10) DEFAULT 1")
+cursor.execute("ALTER TABLE users ADD COLUMN id_picture_panel INTEGER DEFAULT 0")
 
 # Сохранение изменений и закрытие соединения
 conn.commit()
