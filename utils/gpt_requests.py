@@ -53,7 +53,10 @@ async def chunks_request(chunks, message, settings):
 
         # Ожидаем выполнения всех задач и сохраняем результаты в правильном порядке
         for i, task in tasks.items():
-            result = await task
+            try:
+                result = await task
+            except:
+                result = 0, '-', 0
             used_tokens += int(result[2])
             answers[i] = str(result[1])  # сохраняем ответ в соответствующую позицию
             current_time = time()
@@ -148,24 +151,19 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
                 result = await response.json()
                 status = response.status
                 text = await response.text()
-                print(text)
-
                 answer = result['choices'][0]['message']['content']
                 tokens_used = result['usage']['total_tokens']
                 logger.info(f"Request successful: {tokens_used} tokens used.")
                 return round(time() - start_time, 2), answer, tokens_used
 
         except Exception as e:
-            logger.error(f"Exception occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
-            logger.error(f"Result gpt ans: {result}")
             return 0, '-', 0
 
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector()) as session:
         for attempt in range(1, max_retries + 1):
             time_taken, answer, tokens_used = await make_request(session, attempt, text)
             if answer:
-                print(answer)
                 return time_taken, answer, tokens_used
             logger.warning(f"Retrying... ({attempt}/{max_retries})")
 

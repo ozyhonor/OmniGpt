@@ -58,7 +58,6 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     file_id = message.document.file_id
     file = await bot.get_file(file_id)
     postprocess_bool = await db.get_user_setting('postprocess_bool', user_id)
-    print(file)
     file_path = file.file_path
     main_file_name = ['txt files/', message.document.file_name]
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
@@ -85,11 +84,10 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
         for answer in answer[1]:
-            file.write(answer + "\n\n")
+            file.write(str(answer) + "\n\n")
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 
-    print(postprocess_bool)
     if postprocess_bool:
 
         similar_sentences_files = await remove_similar_sentences("txt files/GPT"+file_name, similar)
