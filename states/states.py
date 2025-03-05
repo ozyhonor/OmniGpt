@@ -73,3 +73,4 @@ class WaitingStateGpt(StatesGroup):
     degree = State()
     theme = State()
     tokens = State()
+    coefficient = State()

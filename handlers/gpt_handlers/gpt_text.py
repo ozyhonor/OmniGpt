@@ -29,6 +29,7 @@ async def go_gpt_text_request(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     degree = await db.get_user_setting('degree', user_id)
     model = await db.get_user_setting('gpt_model', user_id)
+    await bot.send_chat_action(user_id, 'typing')
     answer = await solo_request(None, message, degree, None, model)
     print(answer[1])
     cleared_answer = await convert_latex_to_unicode(answer[1])

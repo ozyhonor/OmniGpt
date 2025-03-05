@@ -201,6 +201,10 @@ settings_request = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🌡 <i>{1}</i></blockquote>\n<blockquote><i>🤖 {2}</i></blockquote>\n<blockquote><i>📏 {3}</i></blockquote>
 """
 
+settings_request_with_postprocessing = """
+<b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🌡 <i>{1}</i></blockquote>\n<blockquote><i>🤖 {2}</i></blockquote>\n<blockquote><i>📏 {3}</i></blockquote>\n<blockquote><i>⚖️ {4}</i></blockquote>
+"""
+
 vision_request = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote><i>🤖 {1}</i></blockquote>
 """

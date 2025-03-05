@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 import states.states
 import re
+from utils.remove_similar_sentences import remove_similar_sentences
 from utils.decode_any_format import TYPE_TXT_FILE
 from aiogram import types
 from aiogram.fsm.context import FSMContext
@@ -36,6 +37,17 @@ def get_first_score(text):
     # Если число найдено, вернем его как float, иначе 0
     return float(match.group()) if match else 0
 
+def safe_remove(file_path):
+    """Удаляет файл, если он существует."""
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"Файл {file_path} удалён.")
+        else:
+            print(f"Файл {file_path} не существует.")
+    except Exception as e:
+        print(f"Не удалось удалить файл {file_path}: {e}")
+
 
 @gpt_file.message(WaitingStateGpt.file_gpt)
 async def process_file_gpt_request(message: Message, state: FSMContext, settings=None) -> None:
@@ -50,10 +62,11 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     file_path = file.file_path
     main_file_name = ['txt files/', message.document.file_name]
     await bot.download_file(file_path, main_file_name[0]+main_file_name[1])
-
+    similar_sentences_files = ['', '', '']
     text = detect_file_format(main_file_name[0]+main_file_name[1])
     model = await db.get_user_setting('gpt_model', user_id)
     marks = await db.get_user_setting('gpt_tokens', user_id)
+    similar = await db.get_user_setting('similarity_threshold', user_id)
     result: bool = await bot.send_chat_action(user_id, 'typing')
     try:
         marks = int(marks)
@@ -78,18 +91,34 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     print(postprocess_bool)
     if postprocess_bool:
-        sorted_texts = sorted(answer[1], key=get_first_score, reverse=True)
-        file_name = f"txt files/sortedGPT"+file_name
-        with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
-            for answer in sorted_texts or 'omni':
-                file.write(answer + "\n\n")
 
-        document2 = FSInputFile(file_name)
-        await bot.send_document(message.chat.id, document2)
+        similar_sentences_files = await remove_similar_sentences("txt files/GPT"+file_name, similar)
+        document_deleted = FSInputFile(similar_sentences_files[0])
+        await bot.send_message(message.chat.id, 'фильтрованный файл')
+        await bot.send_document(message.chat.id, document_deleted)
 
-    os.remove(f"txt files/{file_name}")
-    os.remove(f'txt files/sorted{file_name}')
-    os.remove(f'{main_file_name[0]+main_file_name[1]}')
+        document_filtered = FSInputFile(similar_sentences_files[1])
+        await bot.send_message(message.chat.id, 'предложения, которые были удалены')
+        await bot.send_document(message.chat.id, document_filtered)
+
+        document_paired = FSInputFile(similar_sentences_files[2])
+        await bot.send_message(message.chat.id, 'похожие предложения')
+        await bot.send_document(message.chat.id, document_paired)
+
+    files_to_remove = [
+        f"txt files/{file_name}",
+        f'{file_name}',
+        similar_sentences_files[0],
+        similar_sentences_files[1],
+        similar_sentences_files[2],
+        f'txt files/sorted{file_name}',
+        f'txt files/GPT{file_name}',
+        f'{main_file_name[0] + main_file_name[1]}'
+    ]
+
+    # Пробуем удалить каждый файл
+    for file_path in files_to_remove:
+        safe_remove(file_path)
 
     await state.clear()
 

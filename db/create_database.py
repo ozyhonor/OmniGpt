@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS users (
     -- Подгруппа "Музыка"
     music TEXT DEFAULT 'None',
     volume_music INTEGER CHECK (volume_music >= 1 AND volume_music <= 100) DEFAULT 20,
+    similarity_threshold FLOAT CHECK (similarity_threshold >= 0 AND similarity_threshold <= 1) DEFAULT 0.5,
+    
 
     -- Постпроцессинг (GPT и Vision)
     vision_prompt TEXT DEFAULT '-',
