@@ -55,14 +55,14 @@ async def vision_request(image_data, settings=None, model='gpt-4o', max_retries=
             "messages": [
                 {
                     "role": "system",
-                    "content": f"{settings or 'Ты модель для анализа изображений'}"
+                    "content": f"Ты — продвинутая модель для анализа изображений. Твоя задача — тщательно анализировать изображения и точно отвечать на запрос пользователя. Будь внимателен к деталям и строго следуй заданному вопросу, предоставь исчерпывающее описание содержимого изображения, избегая ненужных отклонений."
                 },
                 {
                     "role": "user",
                     "content": [
                         {
                             "type": "text",
-                            "text": "What’s in this image?"
+                            "text": f"{settings or 'Что?'}"
                         },
                         {
                             "type": "image_url",
