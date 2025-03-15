@@ -13,6 +13,7 @@ from states.states import WaitingStateGpt
 from aiogram.fsm.context import FSMContext
 from menu import keyboards, texts
 from spawnbot import bot
+from utils.get_flag_by_code import get_flag_by_code
 from aiogram import types
 from spawnbot import bot
 from aiogram import Router
@@ -30,13 +31,6 @@ from utils.split_text_for_gpt import split_text
 translator_router = Router()
 
 
-async def get_dest_and_flag(user_id):
-    dest_lang = await db.get_user_setting('dest_lang', user_id)
-    flag = 0
-    for language in languages:
-        if language['code'].lower() == dest_lang.lower():
-            flag = language['flag']
-    return dest_lang, flag
 
 
 @translator_router.message(F.text == '🔄 Переводчик')
@@ -44,8 +38,9 @@ async def create_gpt_request_for_request(message: Message):
     user_id = message.from_user.id
     f_text = '🔄 Переводчик'
 
-    dest_lang, flag = await get_dest_and_flag(user_id)
 
+    dest_lang = await db.get_user_setting('dest_lang', user_id)
+    flag = await get_flag_by_code(dest_lang)
     markup_inline = keyboards.CustomKeyboard.inline_translated_languages_for_translator()
     markup_reply = keyboards.CustomKeyboard.create_translator_buttons()
 
@@ -60,7 +55,10 @@ async def create_gpt_request_for_request(message: Message):
 async def process_page_navigation(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     page = int(callback_query.data.split(':')[1])
-    dest_lang, flag = await get_dest_and_flag(user_id)
+    
+    dest_lang = await db.get_user_setting('dest_lang', user_id)
+    flag = await get_flag_by_code(dest_lang)
+
     text = texts.translator_text_panel.format(dest_lang, flag, f'{page+1}')
     keyboard = keyboards.CustomKeyboard.inline_translated_languages_for_translator(page=page)
     await callback_query.message.edit_text(text=text)
@@ -74,7 +72,8 @@ async def process_overlap_value_button(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     panel_id = await db.get_user_setting('translator_id_panel', user_id)
     await db.update_user_setting(key='dest_lang', value=dest, user_id=user_id)
-    dest_lang, flag = await get_dest_and_flag(user_id)
+    dest_lang = await db.get_user_setting('dest_lang', user_id)
+    flag = await get_flag_by_code(dest_lang)
     text = texts.translator_text_panel.format(dest_lang, flag, '1')
     await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=text)
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=keyboards.CustomKeyboard.inline_translated_languages_for_translator())

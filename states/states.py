@@ -62,6 +62,11 @@ class WaitingStateVision(StatesGroup):
     vision_settings = State()
     vision_model = State()
 
+
+class WaitingStatePicture(StatesGroup):
+    picture_text = State()
+
+
 class WaitingStateGpt(StatesGroup):
     postsettings = State()
     postmodel = State()

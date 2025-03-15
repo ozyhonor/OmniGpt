@@ -21,6 +21,10 @@ from handlers.vision.vision_router import vision_router
 from handlers.translator_handlers.translator_router import translator_router
 from handlers.vision.vision_settings import vision_settings_router
 from handlers.picture_generation.picture_router import picture_router
+from handlers.picture_generation.picture_text import picture_text
+from handlers.picture_generation.picture_settings import picture_settings
+from handlers.synthesis.synthesis_router import synthesis_router
+from handlers.synthesis.synthesis_settings import synthesis_settings
 
 import sys
 import logging
@@ -65,8 +69,11 @@ async def main() -> None:
         vision_router,
         vision_photo_router,
         vision_settings_router,
-        picture_router
-
+        picture_router,
+        picture_text,
+        picture_settings,
+        synthesis_router,
+        synthesis_settings
     )
     await dp.start_polling(bot, on_startup=on_startup)
 

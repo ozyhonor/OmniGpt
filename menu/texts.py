@@ -62,6 +62,9 @@ picture_panel = """
 <b>Настройки запроса</b>:\n<pre><i>{0}</i></pre><i></i>\n\n<blockquote>🤖 <i>{1}</i></blockquote>\n<blockquote><i>📏 {2}</i></blockquote>\n<blockquote><i>🔢 {3}</i></blockquote>
 """
 
+synthesis_panel = '<b><blockquote>Язык аудио: {0} {1}</blockquote></b>\n<b><blockquote>Формат ответа: {2}</blockquote></b>'
+
+
 
 translator_text_panel = '<b><blockquote>Перевести на {0} {1}</blockquote></b>\n<b><blockquote>{2}/5</blockquote></b>'
 

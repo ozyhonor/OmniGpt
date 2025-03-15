@@ -72,8 +72,7 @@ async def vision_request(image_data, settings=None, model='gpt-4o', max_retries=
                         }
                     ]
                 }
-            ],
-            "max_tokens": 300
+            ]
         }
 
         try:

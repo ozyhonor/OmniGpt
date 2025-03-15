@@ -8,7 +8,7 @@ picture_router = Router()
 
 
 @picture_router.message(F.text == '👨‍🎨 Визуализация')
-async def create_gpt_request_for_request(message: Message):
+async def create_picture_request_for_request(message: Message):
     user_id = message.from_user.id
 
     prompt = await db.get_user_setting('picture_prompt', user_id)

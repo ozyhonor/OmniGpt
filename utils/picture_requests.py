@@ -7,7 +7,7 @@ from setup_logger import logger
 from time import time
 
 
-async def create_solo_photo(text, size="1024x1024", count_of_pictures=1, settings=None, model='dall-e-2',
+async def create_solo_photo(text, size="1024x1024", count_of_pictures=1, model='dall-e-2',
                             max_retries=4):
     start_time = time()
 
@@ -26,7 +26,7 @@ async def create_solo_photo(text, size="1024x1024", count_of_pictures=1, setting
         # Формируем запрос для DALL·E
         data = {
             "model": model,
-            "prompt": f"{settings or 'Создай изображение по описанию'}. {text}",
+            "prompt": f"{text}",
             "n": count_of_pictures,  # Сколько изображений нужно создать
             "size": size  # Размер изображения (например, '1024x1024' или '1792x1024')
         }
@@ -57,9 +57,3 @@ async def create_solo_photo(text, size="1024x1024", count_of_pictures=1, setting
 
     logger.error("Max retries reached. Image generation failed.")
     return None, '-'
-
-
-# Запуск функции для теста
-if __name__ == "__main__":
-    result = asyncio.run(create_solo_photo('Красивый космос с планетами', '1024x1024', 2))
-    print(result)
