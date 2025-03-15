@@ -72,6 +72,9 @@ class WaitingStatePicture(StatesGroup):
 
 
 class WaitingStateGpt(StatesGroup):
+    frequency_penalty_state = State() #уникальност
+    presence_penalty_state = State()   #креативность
+    reasoning_effort_gpt = State() #логика
     postsettings = State()
     postmodel = State()
     queue_files = State()

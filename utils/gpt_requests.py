@@ -125,7 +125,7 @@ async def _save_answers_to_file(answers, message, default_name):
     except:
         ...
 
-async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', max_retries=4):
+async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', max_retries=4, frequency=0, presence=0, reasoning='medium'):
     start_time = time()
 
     async def make_request(session, attempt, text):
@@ -144,8 +144,12 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
                 {"role": "system", "content": f"{settings or basic_settings}"},
                 {"role": "user", "content": f"{text or message.text}"}
             ],
-            "temperature": degree
+            "temperature": degree,
+            "frequency_penalty": frequency,
+            "presence_penalty": presence
+            #"reasoning_effort": reasoning
         }
+
         try:
             async with session.post(url, json=data, headers=headers, proxy=proxy) as response:
                 result = await response.json()

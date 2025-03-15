@@ -88,7 +88,7 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 
-    if postprocess_bool:
+    if postprocess_bool and similar!=0:
 
         similar_sentences_files = await remove_similar_sentences("txt files/GPT"+file_name, similar)
         document_deleted = FSInputFile(similar_sentences_files[0])

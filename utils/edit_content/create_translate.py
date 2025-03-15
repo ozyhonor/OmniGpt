@@ -17,9 +17,7 @@ async def create_translate_text(text, dest='en'):
         while attempt < max_attempts:
             try:
                 result = await translator.translate(text, dest=dest)
-                print(dest)
                 translated_text = result.text
-                print(translated_text)
                 return translated_text
             except Exception as e:
                 print(f"Attempt {attempt+1} failed with error: {e}")

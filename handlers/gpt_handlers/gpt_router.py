@@ -10,7 +10,6 @@ gpt_router = Router()
 
 @gpt_router.message(F.text == '🤖 ChatGpt')
 async def create_gpt_request_for_request(message: Message):
-
     f_text = "🤖 ChatGpt"
     user_id = message.from_user.id
     setting = await db.get_user_setting('gpt', user_id)
@@ -25,13 +24,18 @@ async def create_gpt_request_for_request(message: Message):
     need_analysis = await db.get_user_setting('postprocess_bool', user_id)
     similarity_threshold = await db.get_user_setting('similarity_threshold', user_id)
 
-    new_text_to_panel = texts.settings_request.format(setting, degree, model, tokens)
-    if need_analysis:
-        new_text_to_panel = texts.settings_request_with_postprocessing.format(setting,
-                                                     degree,
-                                                     model,
-                                                     tokens,
-                                                     similarity_threshold)
+    frequency_penalty_gpt = await db.get_user_setting('frequency_penalty_gpt', user_id)
+    reasoning_effort_gpt = await db.get_user_setting('reasoning_effort_gpt', user_id)
+    presence_penalty_gpt = await db.get_user_setting('presence_penalty_gpt', user_id)
+
+    new_text_to_panel = texts.settings_request_with_postprocessing.format(setting,
+                                                                          degree,
+                                                                          model,
+                                                                          tokens,
+                                                                          similarity_threshold,
+                                                                          frequency_penalty_gpt,
+                                                                          reasoning_effort_gpt,
+                                                                          presence_penalty_gpt)
 
     await message.answer(f'{texts.future_request_information.format(f_text)}', reply_markup=markup_reply)
     id_gpt_panel = await message.answer(new_text_to_panel,
@@ -43,13 +47,6 @@ async def create_gpt_request_for_request(message: Message):
 
 @gpt_router.message(F.text == '◀️ Назад')
 async def go_to_main_menu(message: Message, state: FSMContext):
-
     markup = keyboards.CustomKeyboard.create_reply_main_menu()
     await message.answer('<b>Главное меню</b>', reply_markup=markup)
     await state.clear()
-
-
-
-
-
-

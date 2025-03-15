@@ -25,8 +25,11 @@ class ChatGpt:
     def create_gpt_settings(postprocess_bool):
         dict_bool = {1:'✅', 0:'❌'}
         builder = InlineKeyboardBuilder()
-        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель', '📏 Разделить', '📉 Коэффициент']
+        names_settings_gpt = ['⚙️ Настройки', '🌡 Градус', '🤖 Модель', '📏 Разделить']
+        name_settings_gpt_2 = ['📉 Коэффициент', '🚀 Креативность', '🧠 Логика', '🦄 Уникальность']
         for name in names_settings_gpt:
+            builder.button(text=f"{name}", callback_data=f"{name}")
+        for name in name_settings_gpt_2:
             builder.button(text=f"{name}", callback_data=f"{name}")
         builder.row(
             InlineKeyboardButton(text=f'🔬Сортировка {dict_bool[postprocess_bool]}', callback_data='postsettings')

@@ -210,7 +210,7 @@ async def replace_audio(video_path, audio_path):
     return output_video
 
 
-async def add_subtitles_to_video(input_video: str, input_subtitles: str):
+async def add_subtitles_to_video(input_video: str, input_subtitles: str) -> object:
     output_video = input_video.replace('.mp4', '_ws.mp4')
 
     # Команда для наложения субтитров
@@ -401,6 +401,7 @@ async def process_video(video_path, user_id, message):
     auto_subtitles:bool = await db.get_user_setting('smart_sub', user_id)
     words_per_chunk:int = await db.get_user_setting('max_words', user_id)
     overlap:int = await db.get_user_setting('overlap', user_id)
+    dest_lang = await db.get_user_setting('dest_lang', user_id)
     max_duration_seconds = 600 # time to send to recognize
 
 
@@ -434,7 +435,7 @@ async def process_video(video_path, user_id, message):
                 audio_path = await extract_audio(video_to_process)
                 subtitle_path = await send_recognize_request(audio_path, auto_subtitles)
                 if not smart_subtitles:
-                    subtitle_path = await json_to_srt(subtitle_path, overlap)
+                    subtitle_path = await json_to_srt(subtitle_path, overlap=overlap, dest_lang=dest_lang)
 
                 if subtitles:
 
@@ -449,13 +450,10 @@ async def process_video(video_path, user_id, message):
                         merge_ass_subtitles(subtitle_path_to_add_sub,
                                             subtitle_path_to_add_sub_translated, merage_file)
 
-                        video_with_subtitles = await add_subtitles_to_video(video_to_process, merage_file, user_id)
+                        video_with_subtitles = await add_subtitles_to_video(video_to_process, merage_file)
                         print(video_with_subtitles)
 
-
-
                 if translator:
-
 
                     all_chunks = await create_all_chunks(video_with_subtitles, translated_subtitles, user_id)
 

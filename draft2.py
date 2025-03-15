@@ -4,9 +4,11 @@ import sqlite3
 conn = sqlite3.connect('db/users_.db')
 cursor = conn.cursor()
 
-cursor.execute("ALTER TABLE users ADD COLUMN synthesis_language TEXT DEFAULT 'ru'")
-cursor.execute("ALTER TABLE users ADD COLUMN synthesis_response_format TEXT DEFAULT 'text'")
-cursor.execute("ALTER TABLE users ADD COLUMN id_synthesis_panel INTEGER DEFAULT 0")
+#'🚀 Креативность', '🧠 Логика', '🦄 Уникальность'
+
+cursor.execute("ALTER TABLE users ADD COLUMN frequency_penalty_gpt FLOAT CHECK (frequency_penalty_gpt >= -2 AND frequency_penalty_gpt <= 2) DEFAULT 0 ")
+cursor.execute("ALTER TABLE users ADD COLUMN presence_penalty_gpt  FLOAT CHECK (presence_penalty_gpt >= -2 AND presence_penalty_gpt <= 2) DEFAULT 0 ")
+cursor.execute("ALTER TABLE users ADD COLUMN reasoning_effort_gpt TEXT DEFAULT 'medium'")
 
 conn.commit()
 conn.close()

@@ -5,28 +5,18 @@ from aiogram.types import Message
 from states.states import WaitingStateDoVideo
 from aiogram.fsm.context import FSMContext
 import re
-from utils.edit_content.split_video_audio import split_video_and_get_subtitles
 from menu.keyboards import CustomKeyboard
 from utils.create_download_link import upload_file_to_gDisk
 import os
-from utils.edit_content.slow_down_speed import slow_down_speed
+
 from aiogram.types.input_file import FSInputFile
 import shutil
 from utils.youtube_downloaders.download_video import download_video_from_youtube
-from utils.check_interesting_moment import choose_good_moment
-from utils.edit_content.clear_directory import clear_directory
+
 from utils.edit_content.check_size import check_size
-from utils.edit_content.convert_to_short_resol import change_resolution_video
-from utils.download_from_googledrive import create_and_upload_file
-from utils.edit_content.create_video import VideoEditor, combine_video_chunks
-from utils.edit_content.split_video import split_timestamps
-from utils.edit_content.add_music import add_music
+
 from utils.edit_content.video_editor import process_video
-from utils.download_subtitles import download_video_subtitles
-from utils.gpt_requests import chunks_request
-from utils.split_text_for_gpt import split_text
-from utils.decode_any_format import detect_file_format
-from menu import texts
+
 
 video_editor_router = Router()
 

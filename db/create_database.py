@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS users (
     picture_size TEXT DEFAULT '1024x1024',
     picture_count INTEGER CHECK (picture_count >= 1 AND synthes_speed <= 10) DEFAULT 1,
     
+    frequency_penalty_gpt FLOAT CHECK (frequency_penalty_gpt >= -2 AND frequency_penalty_gpt <= 2) DEFAULT 0 ,
+    presence_penalty_gpt  FLOAT CHECK (presence_penalty_gpt >= -2 AND presence_penalty_gpt <= 2) DEFAULT 0,
+    reasoning_effort_gpt TEXT DEFAULT 'medium',
+
+    
     synthesis_language TEXT DEFAULT 'ru',
     synthesis_response_format TEXT DEFAULT 'text',
     
