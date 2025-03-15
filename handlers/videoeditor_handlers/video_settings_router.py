@@ -579,7 +579,7 @@ async def process_translated_language(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     panel_id = await db.get_user_setting('id_settings_panel', user_id)
     markup = CustomKeyboard.inline_translated_languages()
-    await db.update_user_setting('translated_language', lang, user_id)
+    await db.update_user_setting('dest_lang', lang, user_id)
     new_text = await reload_settings(user_id)
     await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=new_text)
     await bot.edit_message_reply_markup(user_id, panel_id, reply_markup=markup)
@@ -795,7 +795,7 @@ async def reload_settings(user_id):
     translated_color = await db.get_user_setting('translated_color', user_id)
     translator = dict_bool[await db.get_user_setting('translator', user_id)]
     source_language = await db.get_user_setting('source_language', user_id)
-    translated_language = await db.get_user_setting('translated_language', user_id)
+    translated_language = await db.get_user_setting('dest_lang', user_id)
     original_speed = await db.get_user_setting('original_speed', user_id)
     translation_speed = await db.get_user_setting('translation_speed', user_id)
     max_words = await db.get_user_setting('max_words', user_id)

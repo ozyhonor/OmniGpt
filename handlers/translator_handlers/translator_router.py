@@ -39,7 +39,7 @@ async def create_gpt_request_for_request(message: Message):
     f_text = '🔄 Переводчик'
 
 
-    dest_lang = await db.get_user_setting('dest_lang', user_id)
+    dest_lang = await db.get_user_setting('translated_language', user_id)
     flag = await get_flag_by_code(dest_lang)
     markup_inline = keyboards.CustomKeyboard.inline_translated_languages_for_translator()
     markup_reply = keyboards.CustomKeyboard.create_translator_buttons()
@@ -71,8 +71,8 @@ async def process_overlap_value_button(callback_query: types.CallbackQuery):
     dest = callback_query.data.split(':')[1]
     user_id = callback_query.from_user.id
     panel_id = await db.get_user_setting('translator_id_panel', user_id)
-    await db.update_user_setting(key='dest_lang', value=dest, user_id=user_id)
-    dest_lang = await db.get_user_setting('dest_lang', user_id)
+    await db.update_user_setting(key='translated_language', value=dest, user_id=user_id)
+    dest_lang = await db.get_user_setting('translated_language', user_id)
     flag = await get_flag_by_code(dest_lang)
     text = texts.translator_text_panel.format(dest_lang, flag, '1')
     await bot.edit_message_text(chat_id=user_id, message_id=panel_id, text=text)

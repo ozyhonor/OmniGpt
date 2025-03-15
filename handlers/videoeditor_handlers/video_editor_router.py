@@ -60,8 +60,9 @@ async def process_video_handler(message: Message, state: FSMContext):
         video = FSInputFile(new_video_path)
         await bot.send_video(chat_id=user_id, video=video)
 
-    os.remove(new_video_path)
-
+    folder_path = "video"
+    shutil.rmtree(folder_path, ignore_errors=True)
+    os.makedirs(folder_path, exist_ok=True)
     await state.clear()
 
 
