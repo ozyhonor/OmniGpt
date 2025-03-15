@@ -63,6 +63,10 @@ class WaitingStateVision(StatesGroup):
     vision_model = State()
 
 
+class WaitingStateSynthesis(StatesGroup):
+    file = State()
+
+
 class WaitingStatePicture(StatesGroup):
     picture_text = State()
 

@@ -25,6 +25,7 @@ from handlers.picture_generation.picture_text import picture_text
 from handlers.picture_generation.picture_settings import picture_settings
 from handlers.synthesis.synthesis_router import synthesis_router
 from handlers.synthesis.synthesis_settings import synthesis_settings
+from handlers.synthesis.synthesis_file import synthesis_file
 
 import sys
 import logging
@@ -73,7 +74,8 @@ async def main() -> None:
         picture_text,
         picture_settings,
         synthesis_router,
-        synthesis_settings
+        synthesis_settings,
+        synthesis_file
     )
     await dp.start_polling(bot, on_startup=on_startup)
 

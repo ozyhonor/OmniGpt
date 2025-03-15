@@ -90,6 +90,7 @@ class CustomKeyboard:
             ]
             builder.row(*buttons_row)
         builder.row(
+            InlineKeyboardButton(text='auto', callback_data='synthesis_language:auto'),
             InlineKeyboardButton(text='🔙 Назад', callback_data='back_synthesis_language')
         )
         return builder.as_markup()
