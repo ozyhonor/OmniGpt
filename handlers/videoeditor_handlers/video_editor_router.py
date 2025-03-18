@@ -60,6 +60,13 @@ async def process_video_handler(message: Message, state: FSMContext):
         video = FSInputFile(new_video_path)
         await bot.send_video(chat_id=user_id, video=video)
 
+    folder_path = 'video'
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+
+    # Создаем папку заново
+    os.makedirs(folder_path)
+
     await state.clear()
 
 

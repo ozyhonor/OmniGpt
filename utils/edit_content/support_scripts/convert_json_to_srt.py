@@ -7,11 +7,15 @@ from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 from utils.edit_content.create_translate import create_translate_text
 import asyncio
+import re
 
 
 def remove_punctuation(text):
     return text.translate(str.maketrans('', '', string.punctuation)).lower().strip()
 
+def split_numbers_in_sentence(sentence):
+    # Используем регулярное выражение для поиска чисел с запятой
+    return re.sub(r'(\d),(\d)', r'\1 \2', sentence)
 nltk.download('punkt')
 
 
@@ -26,7 +30,7 @@ def format_time(seconds):
 
 def split_sentence(text):
     text = text.replace("-", " ")
-
+    text = split_numbers_in_sentence(text)
     words = text.split()
     finder = BigramCollocationFinder.from_words(words)
     scored = finder.score_ngrams(BigramAssocMeasures.likelihood_ratio)
