@@ -4,6 +4,7 @@ import aiofiles
 import srt
 from setup_logger import logger
 import os
+from utils.edit_content.support_scripts.replace_word_in_json import process_json
 from utils.merage_sub_file import merge_ass_subtitles
 from utils.edit_content.local_requests.yandex_translate import translate_subtitles
 from utils.edit_content.local_requests.get_subtitles import send_recognize_request
@@ -435,6 +436,10 @@ async def process_video(video_path, user_id, message):
                 audio_path = await extract_audio(video_to_process)
                 subtitle_path = await send_recognize_request(audio_path, auto_subtitles)
                 if not smart_subtitles:
+                    try:
+                        await process_json(subtitle_path)
+                    except:
+                        print('НЕТ ЗНАКОВ ОБРАБОТКА ПО ВРЕМЕНИ')
                     subtitle_path = await json_to_srt(subtitle_path, overlap=overlap, dest_lang=dest_lang)
 
                 if subtitles:

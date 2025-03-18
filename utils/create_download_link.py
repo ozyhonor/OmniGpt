@@ -17,13 +17,11 @@ def upload_file_sync(file_url: str):
         file_metadata = {"name": os.path.basename(file_url)}
         media = MediaFileUpload(file_url, resumable=True)
 
-        # Загружаем файл
         file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
         file_id = file.get("id")
         file_link = f"https://drive.google.com/file/d/{file_id}/view"
 
-        # Устанавливаем разрешение на публичный доступ
         service.permissions().create(
             fileId=file_id,
             body={"role": "reader", "type": "anyone"},

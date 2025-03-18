@@ -1,65 +1,85 @@
-from random import choice
-import asyncio
-import traceback
-import aiohttp
-from config_reader import gpt_tokens, proxy_config
-from setup_logger import logger
-from time import time
+import nltk
+import string
+from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
 
+nltk.download('punkt')
 
-async def create_solo_photo(text, size="1024x1024", count_of_pictures=1, settings=None, model='dall-e-2',
-                            max_retries=4):
-    start_time = time()
+def normalize(word):
+    return word.strip(string.punctuation).lower()
 
-    async def make_request(session, attempt, text):
-        proxy = proxy_config().get('https')
-        logger.info(f"Attempt {attempt} for image generation request.")
+def split_sentence(text):
+    words = text.split()
 
-        api_key = choice(gpt_tokens)
-        url = "https://api.openai.com/v1/images/generations"
+    # 1. Определяем биграммы
+    finder = BigramCollocationFinder.from_words(words)
+    scored = finder.score_ngrams(BigramAssocMeasures.likelihood_ratio)
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
+    # Выбираем топ-N биграмм, где N зависит от длины текста
+    top_n = max(3, len(words) // 20)  # Минимум 3 биграммы, но не больше 10% от всех слов
+    important_bigrams = {bigram for bigram, score in scored[:top_n]}
 
-        # Формируем запрос для DALL·E
-        data = {
-            "model": model,
-            "prompt": f"{settings or 'Создай изображение по описанию'}. {text}",
-            "n": count_of_pictures,  # Сколько изображений нужно создать
-            "size": size  # Размер изображения (например, '1024x1024' или '1792x1024')
-        }
+    # 2. Добавляем все биграммы, где первое слово — "the" или "The"
+    for i in range(len(words) - 1):
+        cleaned_word = words[i].strip(string.punctuation).lower()
 
-        try:
-            async with session.post(url, json=data, headers=headers, proxy=proxy) as response:
-                result = await response.json()
-                status = response.status
+        if cleaned_word == "the" or len(cleaned_word) == 1:
+            important_bigrams.add((words[i], words[i + 1]))
 
-                if status != 200:
-                    logger.error(f"Request failed with status: {status}, response: {result}")
-                    return None, '-'
+    min_size, max_size = 6, 9
+    chunks = []
+    temp_chunk = []
 
-                image_urls = [img_data['url'] for img_data in result.get('data', [])]  # Получаем URL изображений
-                logger.info(f"Image generation successful: {image_urls}")
-                return round(time() - start_time, 2), image_urls
+    for i, word in enumerate(words):
+        temp_chunk.append(word)
 
-        except Exception as e:
-            logger.error(f"{traceback.format_exc()}")
-            return None, '-'
+        # Проверяем, не является ли слово частью важной биграммы
+        if i + 1 < len(words) and (words[i], words[i + 1]) in important_bigrams:
+            continue  # Пропускаем разрыв, двигаемся дальше
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector()) as session:
-        for attempt in range(1, max_retries + 1):
-            time_taken, image_urls = await make_request(session, attempt, text)
-            if image_urls != '-':
-                return time_taken, image_urls
-            logger.warning(f"Retrying... ({attempt}/{max_retries})")
+        # Разрыв по знакам препинания, если длина фрагмента >= 3
+        if any(punctuation in word for punctuation in ",.!?;:") and len(temp_chunk) >= 3:
+            chunks.append(temp_chunk)
+            temp_chunk = []
+        # Разрыв по длине фрагмента
+        elif len(temp_chunk) >= max_size:
+            chunks.append(temp_chunk)
+            temp_chunk = []
 
-    logger.error("Max retries reached. Image generation failed.")
-    return None, '-'
+    if temp_chunk:
+        chunks.append(temp_chunk)
 
+    # Гарантируем, что минимум 3 слова в каждом фрагменте
+    final_chunks = []
+    temp = []
 
-# Запуск функции для теста
-if __name__ == "__main__":
-    result = asyncio.run(create_solo_photo('Красивый космос с планетами', '1024x1024', 2))
-    print(result)
+    for chunk in chunks:
+        if len(chunk) < 3:
+            temp.extend(chunk)
+        else:
+            if temp:
+                chunk = temp + chunk
+                temp = []
+            final_chunks.append(chunk)
+
+    if temp:
+        if final_chunks:
+            final_chunks[-1].extend(temp)
+        else:
+            final_chunks.append(temp)
+    print(important_bigrams)
+
+    return [" ".join(chunk) for chunk in final_chunks]
+
+w1 = []
+text = ' '.join(w1)
+
+split_parts = split_sentence(text)
+
+words_in_sentences = set(normalize(word) for sentence in split_parts for word in sentence.split())
+
+all_words_present = all(normalize(word) in words_in_sentences for word in w1)
+
+print(all_words_present)
+
+print(split_parts)

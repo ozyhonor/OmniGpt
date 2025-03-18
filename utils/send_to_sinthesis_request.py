@@ -14,7 +14,8 @@ async def send_recognize_request(file, language='auto', future_format='text'):
     logger.info(f'Send recognize {file}')
     file_format = detect_file_type(file).split('_')[1]
     data = {
-        'model': 'whisper-1'
+        'model': 'whisper-1',
+        'prompt': 'use punctuation marks actively, U S'
     }
     if language != 'auto':
         data['language'] = language
@@ -30,8 +31,7 @@ async def send_recognize_request(file, language='auto', future_format='text'):
 
     else:
         format = '.srt'
-        data['response_format'] = 'srt'
-
+        data = {"model": 'gpt-4o', "response_format": 'srt'}
 
     api_key = choice(gpt_tokens)
     url = 'https://api.openai.com/v1/audio/transcriptions'
