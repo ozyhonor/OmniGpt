@@ -182,8 +182,9 @@ async def replace_audio(video_path, audio_path):
         '-y',
         '-i', audio_path,  # Новая аудиодорожка
         '-i', video_path,
+        '-filter_complex', '[1:v]loop=loop=-1:size=1:start=0[v]',
         '-map', '0:a',
-        '-map', '1:v',
+        '-map', '[v]',
         '-shortest',       # Обрезка видео до длины аудиодорожки
         output_video        # Путь для сохранения нового видеофайла
     ]

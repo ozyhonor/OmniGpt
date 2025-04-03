@@ -28,7 +28,7 @@ def format_time(seconds):
     return f"{hours:02}:{minutes:02}:{seconds:02},{millis:03}"
 
 
-def split_sentence(text):
+def split_sentence(text, json_file=None):
     text = text.replace("-", " ")
     text = split_numbers_in_sentence(text)
     words = text.split()
@@ -36,6 +36,8 @@ def split_sentence(text):
     scored = finder.score_ngrams(BigramAssocMeasures.likelihood_ratio)
     top_n = max(3, len(words) // 20)
     important_bigrams = {bigram for bigram, score in scored[:top_n]}
+
+
 
     min_size, max_size = 6, 9
     chunks = []
@@ -95,7 +97,7 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False,
         content = await file.read()
         data = json.loads(content)
         words = data.get("words", [])
-        sentences = split_sentence(data.get("text", ""))
+        sentences = split_sentence(data.get("text", ""), json_file=filepath)
 
     chunks = []
     translated_chunks = []
@@ -121,6 +123,7 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False,
 
             if chunk_start_time is None:
                 chunk_start_time = start_time
+
             chunk_end_time = end_time
 
             current_sentence.append(formatted_word)

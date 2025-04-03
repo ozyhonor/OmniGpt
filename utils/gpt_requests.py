@@ -80,7 +80,9 @@ async def chunks_request(chunks, message, settings):
 
     # Завершаем процесс, обновляем прогресс и сохраняем результат
     await _update_progress(answers, chunks, message, progress_msg)
-
+    if answers:
+        print('revers_answers')
+        answers.reverse()
     await _handle_exception(answers, message)
     return [round(time() - start_time, 2), answers, used_tokens]
 
