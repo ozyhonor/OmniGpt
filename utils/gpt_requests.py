@@ -25,13 +25,11 @@ async def write_book():
     ...
 
 
-
 async def chunks_request(chunks, message, settings):
     start_time = time()
     used_tokens = 0
     user_id = message.from_user.id
     degree = await db.get_user_setting('degree', user_id)
-
 
     model = await db.get_user_setting('gpt_model', user_id)
     if settings is None:
@@ -43,28 +41,31 @@ async def chunks_request(chunks, message, settings):
     # Отправляем первоначальное сообщение с прогрессом
     progress_msg = await message.answer(f'<b>Процесс работы:</b> <i>0/{len(chunks)}</i>')
     last_update_time = time()
+
     try:
         await bot.send_chat_action(user_id, 'typing')
-        # Создаем задачи и сохраняем их в словаре с индексами
+
+        # Создаем словарь асинхронных задач с привязкой к индексу
         tasks = {
             i: asyncio.create_task(solo_request(chunk, message, degree, settings, model))
             for i, chunk in enumerate(chunks)
         }
 
-        # Ожидаем выполнения всех задач и сохраняем результаты в правильном порядке
-        for i, task in tasks.items():
+        # Ожидаем выполнения задач по индексу, чтобы сохранить порядок
+        for i in range(len(chunks)):
             try:
-                result = await task
-            except:
-                result = 0, '-', 0
-            used_tokens += int(result[2])
-            answers[i] = str(result[1])  # сохраняем ответ в соответствующую позицию
-            current_time = time()
-            # Обновляем прогресс каждые 10 задач
-            if (i + 1) % 10 == 0 or (current_time - last_update_time) >= 5:
-                await _update_progress(answers, chunks, message, progress_msg)
-                last_update_time = current_time  # Сбрасываем таймер обновления
+                result = await tasks[i]  # Дожидаемся именно той задачи, что соответствует индексу
+                answers[i] = str(result[1]) if result else '-'  # Сохраняем ответ в правильную позицию
+                used_tokens += int(result[2]) if result else 0
+            except Exception as e:
+                answers[i] = '-'
+                print(f"Ошибка в запросе {i}: {e}")
 
+            current_time = time()
+            # Обновляем прогресс каждые 10 задач или раз в 5 секунд
+            if (i + 1) % 10 == 0 or (current_time - last_update_time) >= 5:
+                ...
+                last_update_time = current_time  # Сбрасываем таймер обновления
 
                 try:
                     await bot.send_chat_action(user_id, 'typing')
@@ -80,12 +81,9 @@ async def chunks_request(chunks, message, settings):
 
     # Завершаем процесс, обновляем прогресс и сохраняем результат
     await _update_progress(answers, chunks, message, progress_msg)
-    if answers:
-        print('revers_answers')
-        answers.reverse()
-    await _handle_exception(answers, message)
-    return [round(time() - start_time, 2), answers, used_tokens]
+    await _save_answers_to_file(answers, message, "OmniBot")
 
+    return [round(time() - start_time, 2), answers, used_tokens]
 
 # Асинхронная функция для обновления прогресса
 async def _update_progress(answers, chunks, message, msg):
@@ -108,9 +106,11 @@ async def _handle_stop_gpt(answers, message):
 # Асинхронная функция для обработки исключений и сохранения результатов
 async def _handle_exception(answers, message):
     try:
-        answers = reversed(sorted(answers, key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+',
-                                                                                                             x) and 0 <= int(
-            re.search(r'\d+', x).group()) <= 10 else float('-inf')))
+        import re
+
+        answers = sorted(answers,
+                         key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else float('-inf'),
+                         reverse=True)
 
         await _save_answers_to_file(answers, message, "OmniBot")
     except:

@@ -51,12 +51,13 @@ def preprocess_corpus(corpus):
     """Обрабатывает весь корпус синхронно."""
     return [preprocess_text(sentence) for sentence in corpus]
 
-async def remove_similar_sentences(filename, threshold=0.18):
+async def remove_similar_sentences(filename,anserws, threshold=0.18):
     """Читает файл, удаляет дублирующиеся предложения и сохраняет результат в два файла."""
     # Читаем файл асинхронно
     async with aiofiles.open(filename, 'r', encoding='UTF-8') as f:
         corpus = [line.strip() for line in await f.readlines() if line.strip()]
-
+    corpus = anserws
+    print(corpus)
     # Обрабатываем текст (ТЕПЕРЬ СИНХРОННО)
     processed_corpus = preprocess_corpus(corpus)
     vect = TfidfVectorizer(min_df=1)
@@ -70,7 +71,13 @@ async def remove_similar_sentences(filename, threshold=0.18):
                 to_remove.add(j)
                 similar_pairs.append((corpus[i], corpus[j]))
 
+
     filtered_corpus = [sentence + '\n' for idx, sentence in enumerate(corpus) if idx not in to_remove]
+
+    filtered_corpus = sorted(filtered_corpus,
+                     key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else float('-inf'),
+                     reverse=True)
+
     deleted_corpus = [sentence + '\n' for idx, sentence in enumerate(corpus) if idx in to_remove]
 
     # Записываем результат в файлы

@@ -13,8 +13,13 @@ def sort_and_filter(file_path):
         lines = [line.strip().replace('0 - _', '') for line in lines if line.strip() and len(line) >= 30 and bool(re.search(r'[1-9]', line))]
 
         # Сортировка по первой цифре в строке в убывающем порядке и от 0 до 10
-        sorted_lines = sorted(lines, key=lambda x: float(re.search(r'\d+(\.\d+)?', x[0:16]).group()) if re.search(
-            r'\d+(\.\d+)?', x[0:16]) else 0, reverse=True)
+        import re
+
+        sorted_lines = sorted(
+            lines,
+            key=lambda x: float(re.search(r'\d+(\.\d+)?', x).group()) if re.search(r'\d+(\.\d+)?', x) else 0,
+            reverse=True
+        )
 
         # Запись отсортированных строк обратно в файл
         with open('txt files/sorted '+file_path, 'w', encoding=TYPE_TXT_FILE or 'utf-8') as file:

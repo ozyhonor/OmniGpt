@@ -79,18 +79,18 @@ async def process_file_gpt_request(message: Message, state: FSMContext, settings
 
     await message.answer(texts.water_mark_omnigpt.format(answer[2]))
 
-
     file_name = main_file_name[1].rsplit('.', 1)[0] + '.txt'
-
+    answers_to_similar = []
     with open(file_name, "w", encoding=TYPE_TXT_FILE or "utf-8") as file:
         for answer in answer[1]:
+            answers_to_similar.append(answer)
             file.write(str(answer) + "\n\n")
     document = FSInputFile("txt files/GPT"+file_name)
     await bot.send_document(message.chat.id, document)
 
     if postprocess_bool and similar!=0:
-
-        similar_sentences_files = await remove_similar_sentences("txt files/GPT"+file_name, similar)
+        print('ans to sim')
+        similar_sentences_files = await remove_similar_sentences("txt files/GPT"+file_name,answers_to_similar, similar)
         document_deleted = FSInputFile(similar_sentences_files[0])
         await bot.send_message(message.chat.id, 'фильтрованный файл')
         await bot.send_document(message.chat.id, document_deleted)
