@@ -74,9 +74,11 @@ async def remove_similar_sentences(filename,anserws, threshold=0.18):
 
     filtered_corpus = [sentence + '\n' for idx, sentence in enumerate(corpus) if idx not in to_remove]
 
-    filtered_corpus = sorted(filtered_corpus,
-                     key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else float('-inf'),
-                     reverse=True)
+    filtered_corpus = sorted(
+        filtered_corpus,
+        key=lambda x: int(re.search(r'\d+', x[:100]).group()) if re.search(r'\d+', x[:100]) else float('-inf'),
+        reverse=True
+    )
 
     deleted_corpus = [sentence + '\n' for idx, sentence in enumerate(corpus) if idx in to_remove]
 

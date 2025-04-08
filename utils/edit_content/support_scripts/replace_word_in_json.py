@@ -11,23 +11,40 @@ async def process_json(file):
 
     # Обрабатываем слова с дефисами и разделяем их на отдельные слова
     for i in w1:
+        if ('.' in i) and not i.endswith('.') and i.count('.')==1:
+            index = w1.index(i)
+            w1[index] = i.split('.')[0]
+            for _ in i.split('.')[1:]:
+                w1.insert(index + 1, _)
+        if (',' in i) and not i.endswith(','):
+            index = w1.index(i)
+            w1[index] = i.split(',')[0]
+            for _ in i.split(',')[1:]:
+                w1.insert(index + 1, _)
         if '-' in i:
             index = w1.index(i)
             w1[index] = i.split('-')[0]
             for _ in i.split('-')[1:]:
                 w1.insert(index + 1, _)
+        if '%' in i:
+            index = w1.index(i)
+            w1[index] = i.split('%')[0]
+            for _ in i.split('%')[1:]:
+                w1.insert(index + 1, _)
+
         if i.count('.') >= 2:
             index = w1.index(i)
             parts = i.split('.')
             w1[index] = parts[0]  # Первое слово + точка
             for part in parts[1:]:
                 if part:
-                    print(part, 'paaart')# Игнорируем пустые строки
+                    print(part, 'paaart')  # Игнорируем пустые строки
                     w1.insert(index + 1, part)
-
 
     # Получаем список слов из исходной структуры JSON
     w2 = [i["word"] for i in a['words']]
+    for a,i in enumerate(w2):
+        print(i, w1[a])
 
     # Заменяем слова в w2 на обновленные из w1
     for i in range(len(a['words'])):

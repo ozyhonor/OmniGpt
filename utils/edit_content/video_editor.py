@@ -2,6 +2,7 @@ from db.database import db
 import asyncio
 import aiofiles
 import srt
+from datetime import datetime, timedelta
 from setup_logger import logger
 import os
 from utils.edit_content.support_scripts.replace_word_in_json import process_json
@@ -108,9 +109,8 @@ async def concatenate_videos(input_file, output_file):
     return output_file
 
 # Основная асинхронная функция для обработки видео
-async def process_videos(video_files, video_with_subtitles):
+async def process_videos(video_files):
     # Создание списка клипов
-    new_name = video_with_subtitles.replace('.mp4', 'omni.mp4')
 
     clips = [f'file {video}' for video in video_files]
 
@@ -292,7 +292,8 @@ async def create_all_chunks(video_path, subtitles_path, user_id):
     voice = await db.get_user_setting('synthes_voice', user_id)
     output_file = ...
     speed = await db.get_user_setting('translation_speed', user_id)
-    model = 'tts-1'
+    overlap = await db.get_user_setting('overlap', user_id)
+    model = 'gpt-4o-mini-tts'
     info_message = await bot.send_message(user_id, 'Обработка видео')
     info_message_id = info_message.message_id
     subtitles = await get_subtitles_content(subtitles_path)
@@ -304,6 +305,10 @@ async def create_all_chunks(video_path, subtitles_path, user_id):
             logger.error(e)
         start, end, text = chunk.start, chunk.end, chunk.content
         print('start =', start, 'end=', end)
+        if x != len(subtitles):
+            start = (datetime.strptime(start, "%H:%M:%S.%f") + timedelta(seconds=overlap/1000)).strftime("%H:%M:%S.%f")
+            end = (datetime.strptime(end, "%H:%M:%S.%f") + timedelta(seconds=overlap/1000)).strftime("%H:%M:%S.%f")
+
         print(time_to_float(end) - time_to_float(start))
         if (time_to_float(end) - time_to_float(start)) >= 1:
             video_fragment = await trim_by_timecode(video_path, start, end)
@@ -406,11 +411,13 @@ async def process_video(video_path, user_id, message):
     dest_lang = await db.get_user_setting('dest_lang', user_id)
     max_duration_seconds = 600 # time to send to recognize
 
-
+    if True:
+        video_path = await compress_video_auto_resolution(video_path)
 
     new_video_path = None
 
     videos_path_by_timecode = []
+    redy_trimmed_video = []
     for part in timestamps.split(' '):
         if part != '0':
             start, end = part[0], part[1]
@@ -440,8 +447,8 @@ async def process_video(video_path, user_id, message):
                     try:
                         await process_json(subtitle_path)
                     except:
-                        print('НЕТ ЗНАКОВ ОБРАБОТКА ПО ВРЕМЕНИ')
-                    subtitle_path = await json_to_srt(subtitle_path, overlap=overlap, dest_lang=dest_lang)
+                        logger.error('НЕТ ЗНАКОВ ОБРАБОТКА ПО ВРЕМЕНИ')
+                    subtitle_path = await json_to_srt(subtitle_path, dest_lang=dest_lang)
 
                 if subtitles:
 
@@ -467,15 +474,94 @@ async def process_video(video_path, user_id, message):
                     message_info_id = message_info.message_id
                     logger_ = MyBarLogger()
                     monitoring_task = asyncio.create_task(monitor_progress(logger_, user_id, message_info_id))
-                    new_video_path = await process_videos(all_chunks, video_with_subtitles)
+                    new_video_path = await process_videos(all_chunks)
+                    redy_trimmed_video.append(new_video_path)
                     monitoring_task.cancel()
                     try:
                         await bot.edit_message_text('Склейка 100% ✅', chat_id=user_id, message_id=message_info_id)
                         await monitoring_task
                     except asyncio.CancelledError:
                         pass
-    return new_video_path
+    if len(redy_trimmed_video) != 1:
+        new_ready_video_to_send_to_user = await process_videos(redy_trimmed_video)
+        return new_ready_video_to_send_to_user
+    else:
+        return redy_trimmed_video[0]
 
+
+import asyncio
+import os
+import json
+import math
+
+async def get_video_resolution(path):
+    command = [
+        "ffprobe",
+        "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "stream=width,height",
+        "-of", "json",
+        path
+    ]
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await process.communicate()
+    if process.returncode != 0:
+        print(f"ffprobe error: {stderr.decode()}")
+        return None
+
+    info = json.loads(stdout.decode())
+    width = info["streams"][0]["width"]
+    height = info["streams"][0]["height"]
+    return width, height
+
+def get_scaled_resolution(width, height, scale_factor=0.5):
+    new_width = math.floor(width * scale_factor)
+    new_height = math.floor(height * scale_factor)
+    # Обязательно делаем чётными
+    if new_width % 2 != 0: new_width -= 1
+    if new_height % 2 != 0: new_height -= 1
+    return f"{new_width}x{new_height}"
+
+async def compress_video_auto_resolution(input_path, scale_factor=0.5, video_bitrate="500k", audio_bitrate="64k"):
+    resolution = await get_video_resolution(input_path)
+    if not resolution:
+        return None
+
+    scaled_res = get_scaled_resolution(*resolution, scale_factor)
+    temp_output = input_path.replace(".mp4", "_compressed_temp.mp4")
+
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i", input_path,
+        "-vf", f"scale={scaled_res}",
+        "-b:v", video_bitrate,
+        "-b:a", audio_bitrate,
+        "-preset", "fast",
+        temp_output
+    ]
+
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+
+    stdout, stderr = await process.communicate()
+
+    if process.returncode != 0:
+        print(f"Compression error: {stderr.decode()}")
+        return None
+
+    # Удаляем оригинал и переименовываем новый
+    os.remove(input_path)
+    os.rename(temp_output, input_path)
+
+    return input_path
 
 
 

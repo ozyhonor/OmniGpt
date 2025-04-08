@@ -11,7 +11,7 @@ import re
 
 
 def remove_punctuation(text):
-    return text.translate(str.maketrans('', '', string.punctuation)).lower().strip()
+    return text.translate(str.maketrans('', '', string.punctuation)).lower().strip().replace(' ', '')
 
 def split_numbers_in_sentence(sentence):
     # Используем регулярное выражение для поиска чисел с запятой
@@ -28,28 +28,75 @@ def format_time(seconds):
     return f"{hours:02}:{minutes:02}:{seconds:02},{millis:03}"
 
 
+def remove_punctuation_bigrams(bigrams):
+    # Регулярное выражение для поиска знаков препинания в слове
+    punctuation_pattern = re.compile(r'[^\w\s]')  # Ищем любые символы, которые не являются буквами или пробелами
+    filtered_bigrams = []
+
+    for bigram in bigrams:
+        word1, word2 = bigram
+        # Если ни одно из слов не содержит знак препинания, оставляем биграмму
+        if not punctuation_pattern.search(word1) and not punctuation_pattern.search(word2):
+            filtered_bigrams.append(bigram)
+
+    return filtered_bigrams
+
 def split_sentence(text, json_file=None):
     text = text.replace("-", " ")
     text = split_numbers_in_sentence(text)
     words = text.split()
     finder = BigramCollocationFinder.from_words(words)
-    scored = finder.score_ngrams(BigramAssocMeasures.likelihood_ratio)
-    top_n = max(3, len(words) // 20)
+    scored = finder.score_ngrams(BigramAssocMeasures.mi_like)
+    top_n = max(3, len(words) // 13)
     important_bigrams = {bigram for bigram, score in scored[:top_n]}
+    important_bigrams = remove_punctuation_bigrams(important_bigrams)
+    print('importannt biorams', important_bigrams)
 
 
 
-    min_size, max_size = 6, 9
+    min_size, max_size = 3, 21
     chunks = []
     temp_chunk = []
+    if json_file:
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+            word_timings = data.get("words", [])
 
     for i, word in enumerate(words):
         temp_chunk.append(word)
+
+        if word_timings and i > 0 and i+1<len(words):
+            prev_end = word_timings[i]["end"]
+            curr_start = word_timings[i+1]["start"]
+            if curr_start - prev_end > 1.0 and len(temp_chunk) >= min_size:
+                chunks.append(temp_chunk)
+                print('поделили 1.0')
+                print(temp_chunk)
+                temp_chunk = []
+                continue
+            elif curr_start - prev_end > 2.0:
+                chunks.append(temp_chunk)
+                print('поделили 2.0')
+                print(temp_chunk)
+                temp_chunk = []
+                continue
+
         if i + 1 < len(words) and (words[i], words[i + 1]) in important_bigrams:
             continue
-        if any(punctuation in word for punctuation in ",.!?;:") and len(temp_chunk) >= 3:
+
+        next_word = words[i + 1] if i + 1 < len(words) else ""
+        next_next_word = words[i + 2] if i + 2 < len(words) else ""
+
+        if (
+                (any(p in next_word for p in ".!?;:") or any(p in next_next_word for p in ".!?;:"))
+                and len(temp_chunk) < max_size
+        ):
+            continue
+
+        if any(punctuation in word for punctuation in ",.!?;:") and len(temp_chunk) >= min_size:
             chunks.append(temp_chunk)
             temp_chunk = []
+
         elif len(temp_chunk) >= max_size:
             chunks.append(temp_chunk)
             temp_chunk = []
@@ -61,7 +108,7 @@ def split_sentence(text, json_file=None):
     temp = []
 
     for chunk in chunks:
-        if len(chunk) < 3:
+        if len(chunk) < min_size:
             temp.extend(chunk)
         else:
             if temp:
@@ -88,10 +135,9 @@ async def write_srt_file(chunks, filepath):
             await file.write(srt_entry)
 
 
-async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False, dest_lang='en'):
+async def json_to_srt(filepath: str, translator: bool = False, dest_lang='en'):
     output_filepath = os.path.splitext(filepath)[0] + '.srt'
     output_filepath_translated = os.path.splitext(filepath)[0] + '_translated.srt'
-    overlap = overlap / 1000
 
     async with aiofiles.open(filepath, mode='r') as file:
         content = await file.read()
@@ -131,20 +177,20 @@ async def json_to_srt(filepath: str, overlap: int = 0, translator: bool = False,
 
             sentence_index += 1
             print(current_sentence_translated, sentence.strip())
-            if remove_punctuation(" ".join(current_sentence_translated).strip()) == remove_punctuation(sentence.strip()):
+            if remove_punctuation("".join(current_sentence_translated).strip()) == remove_punctuation(sentence.strip()):
                 break
 
         if chunk_start_time is not None and chunk_end_time is not None:
             chunks.append({
                 "start": chunk_start_time,
-                "end": chunk_end_time + overlap,
+                "end": chunk_end_time,
                 "text": " ".join(current_sentence)
             })
 
             translated_chunk_text = await create_translate_text(" ".join(current_sentence_translated), dest_lang)
             translated_chunks.append({
                 "start": chunk_start_time,
-                "end": chunk_end_time + overlap,
+                "end": chunk_end_time,
                 "text": translated_chunk_text
             })
 

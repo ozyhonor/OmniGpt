@@ -157,6 +157,7 @@ async def solo_request(text, message, degree, settings, model='gpt-3.5-turbo', m
                 result = await response.json()
                 status = response.status
                 text = await response.text()
+                print(result)
                 answer = result['choices'][0]['message']['content']
                 tokens_used = result['usage']['total_tokens']
                 logger.info(f"Request successful: {tokens_used} tokens used.")

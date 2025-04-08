@@ -27,7 +27,7 @@ async def go_gpt_text_request(message: Message, state: FSMContext) -> None:
     voice = await db.get_user_setting('synthes_voice', user_id)
     outputfilename = 'omnibot'
     result: bool = await bot.send_chat_action(message.from_user.id, 'record_voice')
-    answer = await openai_audio_request(model="tts-1", voice=voice, input_text=message.text, output_file=f"audio_files/{outputfilename}.mp3", speed=rate)
+    answer = await openai_audio_request(model="gpt-4o-mini-tts", voice=voice, input_text=message.text, output_file=f"audio_files/{outputfilename}.mp3", speed=rate)
     result: bool = await bot.send_chat_action(message.from_user.id, 'upload_voice')
     audio = FSInputFile(f'audio_files/{outputfilename}.mp3')
     await message.answer(texts.water_mark_omnigpt.format(answer[1]))
